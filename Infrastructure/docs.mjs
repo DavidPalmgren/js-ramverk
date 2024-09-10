@@ -1,4 +1,4 @@
-import openDb from './db/database.mjs';
+import openDb from '../db/database.mjs';
 
 const docs = {
     getAll: async function getAll() {
@@ -38,8 +38,6 @@ const docs = {
                 body.title,
                 body.content,
             );
-        } catch (e) {
-            console.error(e);
         } finally {
             await db.close();
         }
@@ -55,8 +53,6 @@ const docs = {
                 title,
                 id
             );
-        } catch (e) {
-            console.error(e);
         } finally {
             await db.close();
         }

@@ -8,9 +8,7 @@ import path from 'path';
 import morgan from 'morgan';
 import cors from 'cors';
 
-
-
-import docRouter from "./documentsRouter.mjs";
+import docRouter from "./ControllerLayer/documentsRouter.mjs";
 
 
 const app = express();
