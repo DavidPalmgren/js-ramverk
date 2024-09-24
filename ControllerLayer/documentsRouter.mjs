@@ -5,37 +5,26 @@ import { httpOk, brewingCoffee, httpBadRequest, httpCreated } from "./httpCodes.
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-    let response = {};
-    const result = await documents.addNewDocument(req.body);
-    response.code = httpOk;
-    response.data = result;
-    res.json(response);
+    const result = await documents.addNewDocument(req.body.content, req.body.title);
+    res.status(httpOk).json({ data: result });
 });
 
 router.get('/:id', async (req, res) => {
-    let response = {};
-    const result = await documents.getDocumentById(req.params.id)
-    response.code = httpOk;
-    response.data = result;
-    res.json(response);
+    const result = await documents.getDocumentById(req.params.id);
+    res.status(httpOk).json({ data: result });
 });
 
 
-router.post('/update/:id', async (req, res) => {
-    let response = {};
+router.put('/:id', async (req, res, next) => {
     const result = await documents.updateDocument(req.params.id, req.body.title, req.body.content);
-    response.code = httpCreated;
-    response.data = result;
-    res.json(response);
+    res.status(httpCreated).json({ data: result });
 });
 
 router.get('/', async (req, res) => {
-    let response = {};
     const result = await documents.getAllDocuments();
-    response.code = httpOk;
-    response.data = result;
-    res.json(response);
+    res.status(httpOk).json({ data: result });
 });
+
 
 
 export default router;

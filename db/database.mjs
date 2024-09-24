@@ -1,18 +1,15 @@
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
+import mongoose from 'mongoose';
+const uri = `mongodb+srv://${process.env.ATLAS_USERNAME}:${process.env.ATLAS_PASSWORD}@cluster0.wunb9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const clientOptions = { serverApi: { version: '1', strict: true, deprecationErrors: true } };
 
-async function openDb() {
-    let dbFilename = `./db/docs.sqlite`;
+let client;
+const openConnection = async () => {
+    await mongoose.connect(uri, clientOptions);
+};
 
-    if (process.env.NODE_ENV === 'test') {
-        dbFilename = "./db/test.sqlite";
-    }
-
-    return await open({
-        filename: dbFilename,
-        driver: sqlite3.Database
-    });
+const closeConnection = async () => {
+    await mongoose.disconnect();
 }
 
 
-export default openDb;
+export { openConnection, closeConnection };

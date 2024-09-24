@@ -1,7 +1,5 @@
 import docs from "../Infrastructure/docs.mjs";
-
-
-//This object has no purpose YET. But will in the future.
+import objectHelper from "./objectHelper.mjs";
 const documents = {
     getAllDocuments: async function() {
         return await docs.getAll();
@@ -11,12 +9,18 @@ const documents = {
         return await docs.getOne(id);
     },
 
-    addNewDocument: async function(body) {
-        return (await docs.addOne(body)).lastID;
+    addNewDocument: async function(title, content) {
+        return (await docs.addOne(title, content));
     },
 
     updateDocument: async function(id, title, content) {
-        return await docs.updateOne(id, title, content);
+        const documentObject = {
+            title: title,
+            content: content
+        }
+        //Removing undefined values
+        objectHelper.removeUndefined(documentObject);
+        return await docs.updateOne(id,documentObject);
     }
 };
 
