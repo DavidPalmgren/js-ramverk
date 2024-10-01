@@ -66,6 +66,10 @@
   color: white;
 }
 
+.margin-low {
+  margin: 5px;
+}
+
 
 .doc-create {
   text-align: left;
@@ -87,6 +91,57 @@
     color: white;
   }
 }
+
+
+
+.single-doc-wrapper {
+  width: 1000px;
+  border: 2px solid black;
+  height: 1200px;
+}
+
+/*TODO fix so that it wont go out of limits and create the dum scroll bar thing */
+.single-doc-title, 
+.single-doc-content {
+    width: 100%;
+    textarea {
+
+      box-sizing: border-box;
+      padding: 20px;
+
+    }
+}
+
+.single-doc-title {
+  text-align: center;
+  textarea {
+    font-size: 24px;
+    text-align: center;
+  }
+}
+.single-doc-content {
+
+  textarea {
+    font-size: 16px;
+    height: 1000px;
+    font-family:Arial, Helvetica, sans-serif;
+  }
+}
+
+textarea {
+  width: 100%;
+  /* took me forever to find a way to remove all the default stuff */
+  border: none;
+  overflow: auto;
+  outline: none;
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  resize: none;
+  background-color: transparent;
+}
+
+
 
 .logo {
   height: 6em;
