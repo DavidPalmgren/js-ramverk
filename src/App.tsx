@@ -1,4 +1,3 @@
-//import { useState } from 'react'
 import './assets/App.css'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -19,7 +18,6 @@ function App() {
         if (response.ok) {
           data = await response.json()
           setDocuments(data.data)
-          console.log(data.data)
         }
       } catch (errorMsg) {
         console.error(errorMsg)
@@ -29,21 +27,19 @@ function App() {
   }, []);
 
   async function postDocument(title: string, content:string) {
-    console.log(`vars: ${title}, ${content}`)
     try {
       const response = await fetch(`${apiAddress}`, {
         headers: {
           "Content-Type": "application/json"
-        }, // error on backend so im swapping these so they'll be correct temporarily
+        }, // error on backend so im swapping these vars so they'll be correct temporarily
         body: JSON.stringify({
           "title": content,
           "content": title
         }),
         method: "POST"
-      }) //testa efter inte klar just nu
+      })
       const data = await response.json()
-      console.log(data)
-
+      console.log(`Document has been created succesfully :), ${data}`)
     } catch (errorMsg) {
       console.error(errorMsg)
     }
@@ -55,8 +51,7 @@ function App() {
   // ts is very annoying dont think ill be using it very much honestly
   function createDocument(e:React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault()
-    console.log(`Your title is: ${title}`)
-    postDocument(title, "filler contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller content")
+    postDocument(title, "")
   }
 
 

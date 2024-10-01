@@ -1,6 +1,6 @@
 import '../assets/App.css'
 import { useEffect, useState } from 'react'
-import { json, useParams, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
 
 function Document() {
@@ -9,8 +9,6 @@ function Document() {
   const { id } = useParams()
 
   const apiAddress = import.meta.env.VITE_API_ADDRESS
-
-  console.log(`id: ${id}`)
 
   useEffect(() => {
     const fetchDocument = async () => {
@@ -30,14 +28,8 @@ function Document() {
   }, []);
 
   async function updateDocument() {
-    console.log('got it here')
-    console.log(title)
-    console.log(content)
-
-    console.log('got it here')
-
     try {
-      const response = await fetch (`${apiAddress}/${id}`, {
+      await fetch (`${apiAddress}/${id}`, {
         headers: {
           'Content-Type': 'application/json'
         },
@@ -47,8 +39,8 @@ function Document() {
         }),
         method: "PUT"
       })
-    } catch (error) {
-      console.log(error)
+    } catch (errorMsg) {
+      console.error(errorMsg)
     }
   }
 
