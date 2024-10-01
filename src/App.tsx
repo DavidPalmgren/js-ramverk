@@ -1,6 +1,7 @@
 //import { useState } from 'react'
 import './assets/App.css'
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 function App() {
   const apiAddress = import.meta.env.VITE_API_ADDRESS
@@ -79,6 +80,7 @@ function App() {
       </div>
       <div className='doc-container'>
       {documents.map(doc => (
+        <Link to={doc._id}>
         <div className='doc-mini' key={doc._id}>
           <p className='doc-title'>
             {doc.title}
@@ -90,6 +92,7 @@ function App() {
           </div>
 
           </div>
+          </Link>
       ))}
       </div>
     </>
