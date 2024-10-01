@@ -55,7 +55,7 @@ function App() {
   function createDocument(e:React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault()
     console.log(`Your title is: ${title}`)
-    postDocument(title, "filler content")
+    postDocument(title, "filler contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller contentfiller content")
   }
 
 

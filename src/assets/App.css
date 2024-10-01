@@ -26,6 +26,10 @@
 .doc-title {
   font-size: 20px;
   border-bottom: 2px solid lightblue;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .doc-subtext-container {
@@ -40,6 +44,11 @@
 .doc-subtext {
   color:rgba(0, 0, 0, 0.801);
   font-size: 14px;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+  overflow: hidden; 
 }
 
 .utility-bar {
