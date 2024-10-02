@@ -130,7 +130,7 @@
 
 textarea {
   width: 100%;
-  /* took me forever to find a way to remove all the default stuff */
+  /* took me forever to find a way to remove all the default stuff but bar still persists todo*/
   border: none;
   overflow: auto;
   outline: none;
