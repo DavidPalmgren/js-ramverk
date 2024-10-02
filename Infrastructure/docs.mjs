@@ -7,17 +7,12 @@ const docs = {
     },
 
     getOne: async function getOne(id) {
-        try {
-            return await DocModule.findById(id);
-        } catch (error){
-            console.log(error.message)
-        }
+        return await DocModule.findById(id);
     },
 
     addOne: async function addOne(title, content) {
         const document = new DocModule({ title, content });
         await document.save();
-
         return document;
     },
 

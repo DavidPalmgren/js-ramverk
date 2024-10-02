@@ -1,8 +1,14 @@
 import mongoose from 'mongoose';
 
 const documentSchema = new mongoose.Schema({
-    title: String,
-    content: String
+    title: {
+        type: String,
+        required: true
+    },
+    content: {
+        type: String,
+        required: true
+    }
 });
 
 const MongoDocument = mongoose.model('Document', documentSchema);

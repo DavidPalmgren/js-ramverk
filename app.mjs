@@ -1,12 +1,12 @@
 
-import 'dotenv/config'
+import 'dotenv/config';
 
 const port = process.env.PORT || 1337;
 import cors from 'cors'
 
 import express from 'express';
 import bodyParser from 'body-parser';
-import { openConnection, closeConnection } from "./db/database.mjs";
+import { openConnection, closeConnection } from "./Infrastructure/db/database.mjs";
 import morgan from 'morgan';
 import docRouter from "./ControllerLayer/documentsRouter.mjs";
 
@@ -27,21 +27,23 @@ app.use((err, req, res, next) => {
     res.status(errorCode).send('Something broke!');
 })
 
-openConnection().then(() => {
-    app.listen(port, () => {
-        console.log(`running`);
-    });
-});
-
-['SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
-    'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
-].forEach( (sig) => {
-    process.on(sig, () => {
-        closeConnection().then( () => {
-            process.exit(1);
+const startServer = async () => {
+    openConnection().then(() => {
+        app.listen(port, () => {
+            console.log(`running`);
         });
-    })
-});
+    });
+}
+
+const closeServer = async () => {
+    closeConnection().then( () => {
+        process.exit(1);
+    });
+}
+
+export {startServer, closeServer};
+
+export default app;
 
 
 

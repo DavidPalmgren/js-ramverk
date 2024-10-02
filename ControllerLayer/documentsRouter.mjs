@@ -5,8 +5,8 @@ import { httpOk, brewingCoffee, httpBadRequest, httpCreated } from "./httpCodes.
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-    const result = await documents.addNewDocument(req.body.content, req.body.title);
-    res.status(httpOk).json({ data: result });
+    const result = await documents.addNewDocument(req.body.title, req.body.content);
+    res.status(httpCreated).json({ data: result });
 });
 
 router.get('/:id', async (req, res) => {
@@ -17,7 +17,7 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res, next) => {
     const result = await documents.updateDocument(req.params.id, req.body.title, req.body.content);
-    res.status(httpCreated).json({ data: result });
+    res.status(httpOk).json({ data: result });
 });
 
 router.get('/', async (req, res) => {
