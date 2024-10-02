@@ -1,11 +1,18 @@
 import './assets/App.css'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+
+interface Document {
+  _id: string;
+  title: string;
+  content: string;
+}
 
 function App() {
   const apiAddress = import.meta.env.VITE_API_ADDRESS
 
-  const [documents, setDocuments] = useState([])
+  const [documents, setDocuments] = useState<Document[]>([]);
+
 
   const [createToggle, setCreateToggle] = useState(false)
   const [title, setTitle] = useState("")
@@ -49,7 +56,7 @@ function App() {
     setCreateToggle(!createToggle)
   }
   // ts is very annoying dont think ill be using it very much honestly
-  function createDocument(e:React.ChangeEvent<HTMLInputElement>) {
+  function createDocument(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     postDocument(title, "")
   }
