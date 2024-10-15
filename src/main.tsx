@@ -6,6 +6,8 @@ import {
 } from "react-router-dom";
 import App from './App.tsx'
 import Document from './routes/Document.tsx'
+import CreateAccount from "./routes/CreateAccount.tsx";
+import Login from "./routes/Login.tsx";
 import './index.css'
 
 
@@ -17,6 +19,14 @@ const router = createBrowserRouter([
   {
     path: "/:id",
     element: <Document/>
+  },
+  {
+    path: "/signup",
+    element: <CreateAccount/>
+  },
+  {
+    path: "/login",
+    element: <Login/>
   }
 ]);
 
