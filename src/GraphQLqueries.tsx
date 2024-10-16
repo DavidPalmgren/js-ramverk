@@ -27,6 +27,7 @@ export default {
           }
         }`
     },
+
     updateDocument: (document: string, content: string) : string => {
         return `mutation {
           updateDocument(content: ${content}, document:${document}) {
