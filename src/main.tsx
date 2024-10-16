@@ -8,6 +8,7 @@ import App from './App.tsx'
 import Document from './routes/Document.tsx'
 import CreateAccount from "./routes/CreateAccount.tsx";
 import Login from "./routes/Login.tsx";
+import AllDocuments from "./routes/AllDocuments.tsx";
 import './index.css'
 
 
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login/>
+  },
+  {
+    path:"/documents",
+    element: <AllDocuments/>
   }
 ]);
 
