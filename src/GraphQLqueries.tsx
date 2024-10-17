@@ -17,7 +17,7 @@ export default {
             title
             content
           }
-        }`
+        }`;
     },
     createDocument: (title: string) => {
         return `mutation {
@@ -25,7 +25,7 @@ export default {
             id
             title
           }
-        }`
+        }`;
     },
 
     updateDocument: (document: string, content: string) : string => {
@@ -34,6 +34,11 @@ export default {
             id
             content
           }
-        }`
+        }`;
+    },
+    addUsers: (users: string[], documentId: string ) : string => {
+        return `mutation {
+            inviteUsers(users: ${users}, documentId: ${documentId})
+        }`;
     }
 }

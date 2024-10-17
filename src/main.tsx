@@ -10,6 +10,7 @@ import CreateAccount from "./routes/CreateAccount.tsx";
 import Login from "./routes/Login.tsx";
 import AllDocuments from "./routes/AllDocuments.tsx";
 import './index.css'
+import DocumentInvite from "./routes/DocumentInvite.tsx";
 
 
 const router = createBrowserRouter([
@@ -32,6 +33,11 @@ const router = createBrowserRouter([
   {
     path:"/documents",
     element: <AllDocuments/>
+  },
+
+  {
+    path:"/documents/invite/:id",
+    element: <DocumentInvite/>
   }
 ]);
 
