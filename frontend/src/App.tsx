@@ -16,21 +16,26 @@ function App() {
 
   const [createToggle, setCreateToggle] = useState(false)
   const [title, setTitle] = useState("")
-
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        let data
-        const response = await fetch(`${apiAddress}`)
-        if (response.ok) {
-          data = await response.json()
-          setDocuments(data.data)
+        console.log(`Fetching from: ${apiAddress}`);
+        const response = await fetch(apiAddress);
+  
+        if (!response.ok) {
+          const text = await response.text(); // Get the response body as text
+          console.error('Error fetching documents:', text);
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      } catch (errorMsg) {
-        console.error(errorMsg)
+  
+        const data = await response.json();
+        setDocuments(data.data); // Adjust this based on your actual response structure
+      } catch (error) {
+        console.error('Fetch error:', error);
       }
-    }
-    fetchDocuments()
+    };
+  
+    fetchDocuments();
   }, []);
 
   async function postDocument(title: string, content:string) {
