@@ -21,7 +21,7 @@ export default {
     },
     createDocument: (title: string) => {
         return `mutation {
-          createDocument(title: ${title}) {
+          createDocument(title: "${title}") {
             id
             title
           }

@@ -21,7 +21,7 @@ function AuthForm({ title, apiEndpoint, buttonText, navigation }: AuthFormProps)
             const response = await fetch(`${apiAddress}${apiEndpoint}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     email,

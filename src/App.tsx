@@ -1,5 +1,6 @@
 import './assets/App.css'
 import { useEffect, useState } from 'react'
+import graphQLqueries from "./GraphQLqueries.tsx";
 import { Link } from 'react-router-dom'
 
 function App() {
@@ -13,31 +14,52 @@ function App() {
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        let data
-        const response = await fetch(`${apiAddress}`)
+        const token = localStorage.getItem("Bearer")
+        const query = graphQLqueries.getUser();
+        const response = await fetch(`${apiAddress}/query`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token
+          },
+          body: JSON.stringify({ query })
+        });
+  
         if (response.ok) {
-          data = await response.json()
-          setDocuments(data.data)
+          const data = await response.json();
+          setDocuments(data.data.user.documents);
+          console.log(data.data.user.documents)
+        } else {
+          const errorText = await response.text();
+          console.error(`Error: ${response.status} ,  ${errorText}`);
         }
       } catch (errorMsg) {
-        console.error(errorMsg)
+        console.error(errorMsg);
       }
-    }
-    fetchDocuments()
+    };
+  
+    fetchDocuments();
   }, []);
 
-  async function postDocument(title: string, content:string) {
+  async function postDocument(title: string) { //content removed now just blank default
     try {
-      const response = await fetch(`${apiAddress}`, {
+      const token = localStorage.getItem("Bearer")
+      const query = graphQLqueries.createDocument(title);
+      console.log('token: ' + token)
+      const response = await fetch(`${apiAddress}/query`, {
         headers: {
-          "Content-Type": "application/json"
-        }, // error on backend so im swapping these vars so they'll be correct temporarily
-        body: JSON.stringify({
-          "title": content,
-          "content": title
-        }),
+          "Content-Type": "application/json",
+          'Authorization': `${token}`
+        },
+        body: JSON.stringify({ query }),
         method: "POST"
       })
+      if (!response.ok) {
+        const errorText = await response.text(); // raw is better for debugging lulw
+        console.error(`Error: ${response.status} - ${errorText}`);
+        return;
+      }
+      console.log(response)
       const data = await response.json()
       console.log(`Document has been created succesfully :), ${data}`)
     } catch (errorMsg) {
@@ -48,10 +70,10 @@ function App() {
   function toggleCreateDocument() {
     setCreateToggle(!createToggle)
   }
-  // ts is very annoying dont think ill be using it very much honestly
+
   function createDocument(e:React.ChangeEvent<HTMLInputElement>) {
     e.preventDefault()
-    postDocument(title, "")
+    postDocument(title)
   }
 
 
@@ -75,8 +97,8 @@ function App() {
       </div>
       <div className='doc-container'>
       {documents.map(doc => (
-        <Link to={doc._id}>
-        <div className='doc-mini' key={doc._id}>
+        <Link to={doc.id}>
+        <div className='doc-mini' key={doc.id}>
           <p className='doc-title'>
             {doc.title}
           </p>
