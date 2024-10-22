@@ -12,7 +12,7 @@ export default {
     },
     getDocument: (document: string) : string => {
         return `query {
-          document(id: ${document}) {
+          document(id: "${document}") {
             id
             title
             content
@@ -30,7 +30,7 @@ export default {
 
     updateDocument: (document: string, content: string) : string => {
         return `mutation {
-          updateDocument(content: ${content}, document:${document}) {
+          updateDocument(content: "${content}", document: "${document}") {
             id
             content
           }
@@ -38,7 +38,7 @@ export default {
     },
     addUsers: (users: string[], documentId: string ) : string => {
         return `mutation {
-            inviteUsers(users: ${users}, documentId: ${documentId})
+            inviteUsers(users: "${users}", documentId: "${documentId}")
         }`;
     }
 }
