@@ -28,14 +28,15 @@ export default {
         }`;
     },
 
-    updateDocument: (document: string, content: string) : string => {
-        return `mutation {
-          updateDocument(content: "${content}", document: "${document}") {
-            id
-            content
-          }
-        }`;
-    },
+    updateDocument: (document: string, title: string, content: string) : string => {
+      return `mutation {
+        updateDocument(document: "${document}", title: "${title}", content: "${content}") {
+          id
+          title
+          content
+        }
+      }`;
+  },
     addUsers: (users: string[], documentId: string ) : string => {
         return `mutation {
             inviteUsers(users: "${users}", documentId: "${documentId}")

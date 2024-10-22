@@ -74,12 +74,16 @@ function Document() {
   //   }
   // }
 
+  // todo?
+  // tror vi satsar på att fixa så att dokument sparas varje 1minute och sedan när sidan stängs ner kanske?
+
   async function updateDocument() {
+    console.log('button pressed')
     try {
-      const query = GraphQLqueries.updateDocument(id, content)
+      const query = GraphQLqueries.updateDocument(id, content, title) // still backwards
       const token = localStorage.getItem('Bearer')
 
-      await fetch (`${apiAddress}/query`, {
+      const response = await fetch (`${apiAddress}/query`, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token
@@ -87,6 +91,14 @@ function Document() {
         body: JSON.stringify({ query }),
         method: "POST"
       })
+      if (!response.ok) {
+        const errorText = await response.text(); // raw is better for debugging lulw
+        console.error(`Error: ${response.status} - ${errorText}`);
+        return;
+      } else {
+        console.log('OK')
+        console.log(response)
+      }
     } catch (errorMsg) {
       console.error(errorMsg)
     }
