@@ -76,6 +76,8 @@ function Document() {
           console.log('new graphql test res is : ', result)
           setTitle(result.data.document.title)
           setContent(result.data.document.content)
+          console.log('CONTENT FROM FETCH')
+          console.log(result.data.document.content)
         }
         if (contentRef.current) {
           contentRef.current.innerHTML = result.data.document.content;
@@ -93,33 +95,39 @@ function Document() {
     const selectedText = selection.toString();
     const mainDiv = document.getElementsByClassName("div-textarea")[0];
     const children = mainDiv.children;
-
+  
     if (selectedText) {
-        let found
-        let commentLine
-        const range = selection.getRangeAt(0);
-        const startNode = range.startContainer;
-
-        for (let i = 0; i < children.length; i++) {
-            if (children[i].contains(startNode)) {
-                console.log(`Selected line: ${i + 2}`, children[i].innerHTML); //+1 for non-idx, +1 for first line not being a div for some reason
-                found = true
-                setCurrCommentLine(i + 2)
-                console.log("currcomment set on line " + currCommentLine)
-                break;
-            }
+      let found;
+      const range = selection.getRangeAt(0);
+      const startNode = range.startContainer;
+  
+      for (let i = 0; i < children.length; i++) {
+        if (children[i].contains(startNode)) {
+          found = true;
+          setCurrCommentLine(i + 2);
+          console.log("Selected line: ", i + 2, children[i].innerHTML);
+          break;
         }
-        
-        const rect = range.getBoundingClientRect();
-        setPopupPosition({ x: rect.left + window.scrollX, y: rect.bottom + window.scrollY });
-        setPopupVisible(true); // Show the popup
-
-        if (!found) {
-          console.log(`Selected line: ${1}`, children[0].innerHTML); //+1 for non-idx, +1 for first line not being a div for some reason
-          setCurrCommentLine(1) // set to 1 for first line
-        }
+      }
+  
+      // SPAN solution
+      const span = document.createElement("span");
+      //span.className = 'highlight';
+      span.classList.add("highlight")
+  
+      range.surroundContents(span); // Wrap in span
+      // CHANGE TO WHEN COMMENT IS ADDED
+      // MAKE SURE THAT COMMENT IS SAVED WITHOUT NEEDING TO ADD MORE TEXT FOR STANDARD setContent update ot content!!!
+  
+      const rect = range.getBoundingClientRect();
+      setPopupPosition({ x: rect.left + window.scrollX, y: rect.bottom + window.scrollY });
+      setPopupVisible(true);
+  
+      if (!found) {
+        setCurrCommentLine(1); // Set to 1 for first line this shit still buggy af
+      }
     }
-};
+  };
 
 
   async function updateDocument() {
@@ -130,6 +138,7 @@ function Document() {
     try {
       const query = GraphQLqueries.updateDocument(id, content, title) // still backwards
       const token = localStorage.getItem('Bearer')
+      console.log(typeof(content))
       
       const response = await fetch (`${apiAddress}/query`, {
         headers: {
@@ -146,6 +155,8 @@ function Document() {
       } else {
         console.log('OK')
         console.log(response)
+        console.log('new content saved')
+        console.log(content)
       }
     } catch (errorMsg) {
       console.error(errorMsg)
@@ -159,65 +170,68 @@ function Document() {
   };
 
   const handleCommentSubmit = (comment, lineNumber) => {
+    const existingComment = comments.find(comment => comment.line === lineNumber);
+    
+    if (existingComment) {
+      alert(`A comment already exists for line ${lineNumber}.`);
+      return;
+    }
+  
     setComments([...comments, { line: lineNumber, text: comment }]);
-    console.log("comments: ", comments)
+
+    console.log("comments: ", comments);
   };
+
 
   const closePopup = () => {
     setPopupVisible(false);
   };
 
   return (
-    <>
-    <Link to={"/"}><button className='button-blue margin-low'> Return</button></Link>
-    <button className='button-blue' onClick={updateDocument}>Update</button>
-    <br></br>
-    <br></br>
+    <div className="document-container">
+      <Link to={"/"}><button className='button-blue margin-low'>Return</button></Link>
+      <button className='button-blue' onClick={updateDocument}>Update</button>
+      <br /><br />
       <div className='single-doc-wrapper'>
         <div className='single-doc-title'>
           <textarea
-            value={title} 
+            value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
         </div>
-         <div className='single-doc-content'>
-           <div
+        <div className='single-doc-content'>
+          <div
             className='div-textarea'
             contentEditable
             ref={contentRef}
             onInput={handleContentChange}
-            onMouseUp={(e) => handleDivAreaSelection(e)}
+            onMouseUp={handleDivAreaSelection}
             style={{
-              border: '1px solid #ccc',
               padding: '10px',
               minHeight: '100px',
+              position: 'relative',
+              width: '75%',
             }}
           />
+          <div className='comments-container'>
+            {comments.map((comment, index) => (
+              <div key={index} className='comment' style={{ top: `${(comment.line - 1) * 30}px` }}>
+                <span>Line {comment.line}: {comment.text}</span>
+              </div>
+            ))}
+          </div>
         </div>
         {popupVisible && (
           <CommentPopup 
             position={popupPosition} 
             onClose={closePopup} 
             onCommentSubmit={handleCommentSubmit}
-            commentLine={currCommentLine} // problem?
+            commentLine={currCommentLine}
           />
         )}
-        {/* temp display remove later */}
-        <div className='comments-section'>
-          <h3>Comments:</h3>
-          {comments.length > 0 ? (
-            comments.map((comment, index) => (
-              <div key={index} className='comment'>
-                Line {comment.line}: {comment.text}
-              </div>
-            ))
-          ) : (
-            <p>No comments yet.</p>
-          )}
-        </div>
       </div>
-    </>
-  )
+    </div>
+  );
 }
 
 

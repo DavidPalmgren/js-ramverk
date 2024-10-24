@@ -28,15 +28,22 @@ export default {
         }`;
     },
 
-    updateDocument: (document: string, title: string, content: string) : string => {
+    updateDocument: (document: string, title: string, content: string): string => {
+      const escapeString = (str: string) => {
+        return str.replace(/\\/g, '\\\\') // Escape backslashes
+                  .replace(/"/g, '\\"')   // Escape double quotes
+                  .replace(/\n/g, '\\n'); // Escape newlines
+      };
+    
       return `mutation {
-        updateDocument(document: "${document}", title: "${title}", content: "${content}") {
+        updateDocument(document: "${escapeString(document)}", title: "${escapeString(title)}", content: "${escapeString(content)}") {
           id
           title
           content
         }
       }`;
-  },
+    },
+    
     addUsers: (users: string[], documentId: string ) : string => {
         return `mutation {
             inviteUsers(users: "${users}", documentId: "${documentId}")

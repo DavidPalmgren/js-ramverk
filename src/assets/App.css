@@ -5,6 +5,10 @@
   text-align: center;
 }
 
+/* .document-container {
+  display: flex;
+} */
+
 .doc-container {
   display: flex;
   flex-wrap: wrap;
@@ -61,9 +65,10 @@
 .button-blue {
   border-radius: 10px;
   width: 90px;
-  height:45px;
+  height: 45px;
   background-color: rgb(0, 140, 255);
   color: white;
+  margin: 5px;
 }
 
 .margin-low {
@@ -95,15 +100,15 @@
 
 
 .single-doc-wrapper {
-  width: 500px;
+  width: 1000px;
   border: 2px solid black;
-  height: 1200px;
+  position: relative;
 }
 
 /*TODO fix so that it wont go out of limits and create the dum scroll bar thing */
-.single-doc-title, 
-.single-doc-content {
-    width: 100%;
+.single-doc-title {
+    width: 75%;
+    position: relative;
     textarea {
 
       box-sizing: border-box;
@@ -112,40 +117,44 @@
     }
 }
 
+.comments-container {
+  position: relative;
+  left: 10px;
+}
+
+.comment {
+  position: absolute; /* Absolute positioning for comments */
+  left: 100%; /* Align comments to the right of the content */
+  white-space: nowrap; /* Prevent line breaks in comments */
+}
+
+.highlight {
+  background-color: yellow;
+}
+
 .div-textarea {
   text-align: left;
   box-sizing: border-box;
   padding: 20px;
-
-  height: 1000px;
-  font-family:Arial, Helvetica, sans-serif;
-  width: 100%;
-  /* just copied over from textarea most styles prolly non functional now*/
+  min-height: 1000px;
+  font-family: Arial, Helvetica, sans-serif;
   border: none;
   overflow: auto;
   outline: none;
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
-  resize: none;
   background-color: transparent;
-
 }
 
 .single-doc-title {
-  text-align: center;
+  width: 100%;
   textarea {
+    width: 100%;
     font-size: 24px;
     text-align: center;
   }
 }
 .single-doc-content {
-
-  textarea {
-    font-size: 16px;
-    height: 1000px;
-    font-family:Arial, Helvetica, sans-serif;
-  }
+  display: flex;
+  width: 100%;
 }
 
 textarea {
