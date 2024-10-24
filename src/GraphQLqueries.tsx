@@ -29,10 +29,10 @@ export default {
     },
 
     updateDocument: (document: string, title: string, content: string): string => {
-      const escapeString = (str: string) => {
-        return str.replace(/\\/g, '\\\\') // Escape backslashes
-                  .replace(/"/g, '\\"')   // Escape double quotes
-                  .replace(/\n/g, '\\n'); // Escape newlines
+      const escapeString = (str: string) => { // There were a bunch of issues with uploading the string so i looked up how to fix it
+        return str.replace(/\\/g, '\\\\') // backslashes
+                  .replace(/"/g, '\\"')   // double quotes
+                  .replace(/\n/g, '\\n'); // newlines
       };
     
       return `mutation {

@@ -5,10 +5,6 @@
   text-align: center;
 }
 
-/* .document-container {
-  display: flex;
-} */
-
 .doc-container {
   display: flex;
   flex-wrap: wrap;
@@ -123,9 +119,9 @@
 }
 
 .comment {
-  position: absolute; /* Absolute positioning for comments */
-  left: 100%; /* Align comments to the right of the content */
-  white-space: nowrap; /* Prevent line breaks in comments */
+  position: absolute;
+  left: 100%;
+  white-space: nowrap;
 }
 
 .highlight {

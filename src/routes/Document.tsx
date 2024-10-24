@@ -112,7 +112,6 @@ function Document() {
   
       // SPAN solution
       const span = document.createElement("span");
-      //span.className = 'highlight';
       span.classList.add("highlight")
   
       range.surroundContents(span); // Wrap in span
