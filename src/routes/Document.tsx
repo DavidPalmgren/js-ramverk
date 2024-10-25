@@ -2,6 +2,7 @@ import '../assets/App.css'
 import { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom';
 import GraphQLqueries from '../GraphQLqueries';
+import postComment from '../api/postComment';
 
 // change to own module maybe?
 const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
@@ -48,11 +49,17 @@ function Document() {
   const contentRef = useRef(null);
   const { id } = useParams()
 
+  //popup hell why am i doing this
   const [popupVisible, setPopupVisible] = useState(false)
   const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 })
 
-  const [currCommentLine, setCurrCommentLine] = useState(0)
+  const [tooltipContent, setTooltipContent] = useState('');
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ left: 0, top: 0 });
+
   const [comments, setComments] = useState([])
+  const [currCommentLine, setCurrCommentLine] = useState(0)
+  const [pendingCommentRange, setPendingCommentRange] = useState(null)
 
   const apiAddress = import.meta.env.VITE_API_ADDRESS
 
@@ -71,17 +78,18 @@ function Document() {
             'Authorization': token
           }
         })
+
         if (response.ok) {
           result = await response.json()
-          console.log('new graphql test res is : ', result)
           setTitle(result.data.document.title)
           setContent(result.data.document.content)
-          console.log('CONTENT FROM FETCH')
-          console.log(result.data.document.content)
+          setComments(result.data.document.comments)
+
+          if (contentRef.current) {
+            contentRef.current.innerHTML = result.data.document.content;
+          }
         }
-        if (contentRef.current) {
-          contentRef.current.innerHTML = result.data.document.content;
-        }
+
       } catch (errorMsg) {
         console.error(errorMsg)
       }
@@ -89,6 +97,41 @@ function Document() {
     fetchDocument()
   }, []);
 
+  // Moving to useeffect cause it wasnt working cause setstate is like async??
+  useEffect(() => {
+    const spans = document.querySelectorAll('span.highlight');
+    spans.forEach(span => {
+        span.addEventListener('mouseover', () => {
+            const commentId = span.id;
+            const comment = getCommentById(commentId);
+            setTooltipContent(comment);
+            setTooltipVisible(true);
+            
+            const rect = span.getBoundingClientRect();
+            setTooltipPosition({
+                left: rect.left,
+                top: rect.bottom + window.scrollY
+            });
+        });
+
+        span.addEventListener('mouseout', () => {
+            setTooltipVisible(false);
+        });
+    });
+
+    return () => {
+        spans.forEach(span => {
+            span.removeEventListener('mouseover', () => {});
+            span.removeEventListener('mouseout', () => {});
+        });
+    };
+  }, [comments]);
+  
+
+  const getCommentById = (commentId: string) => {
+    const comment = comments.find(comment => comment.line === commentId);
+    return comment ? comment.comment : 'No comment found';
+  }
 
   const handleDivAreaSelection = (event) => {
     const selection = window.getSelection();
@@ -101,7 +144,7 @@ function Document() {
       const range = selection.getRangeAt(0);
       const startNode = range.startContainer;
   
-      for (let i = 0; i < children.length; i++) {
+      for (let i = 0; i < children.length; i++) { //remove all this later
         if (children[i].contains(startNode)) {
           found = true;
           setCurrCommentLine(i + 2);
@@ -109,15 +152,9 @@ function Document() {
           break;
         }
       }
-  
-      // SPAN solution
-      const span = document.createElement("span");
-      span.classList.add("highlight")
-  
-      range.surroundContents(span); // Wrap in span
-      // CHANGE TO WHEN COMMENT IS ADDED
-      // MAKE SURE THAT COMMENT IS SAVED WITHOUT NEEDING TO ADD MORE TEXT FOR STANDARD setContent update ot content!!!
-  
+
+      setPendingCommentRange(range)
+
       const rect = range.getBoundingClientRect();
       setPopupPosition({ x: rect.left + window.scrollX, y: rect.bottom + window.scrollY });
       setPopupVisible(true);
@@ -130,14 +167,9 @@ function Document() {
 
 
   async function updateDocument() {
-    
-    console.log('button pressed')
-    console.log(title)
-    console.log(content)
     try {
       const query = GraphQLqueries.updateDocument(id, content, title) // still backwards
       const token = localStorage.getItem('Bearer')
-      console.log(typeof(content))
       
       const response = await fetch (`${apiAddress}/query`, {
         headers: {
@@ -148,14 +180,9 @@ function Document() {
         method: "POST"
       })
       if (!response.ok) {
-        const errorText = await response.text(); // raw is better for debugging lulw
+        const errorText = await response.text();
         console.error(`Error: ${response.status} - ${errorText}`);
         return;
-      } else {
-        console.log('OK')
-        console.log(response)
-        console.log('new content saved')
-        console.log(content)
       }
     } catch (errorMsg) {
       console.error(errorMsg)
@@ -164,28 +191,44 @@ function Document() {
 
   const handleContentChange = () => {
     if (contentRef.current) {
-      setContent(contentRef.current.innerHTML); // Update state with new content
+      setContent(contentRef.current.innerHTML)
     }
   };
 
   const handleCommentSubmit = (comment, lineNumber) => {
     const existingComment = comments.find(comment => comment.line === lineNumber);
+
+    if (pendingCommentRange) {
+      const timestamp = Date.now().toString()
+      const span = document.createElement("span");
+
+      span.classList.add("highlight");
+      span.setAttribute('id', timestamp)
+      postComment.addComment(id, comment, timestamp)
+      pendingCommentRange.surroundContents(span);
+
+      setComments([...comments, { id: 'temp', comment: comment, line: timestamp }]);
+      clearSelection()
+    }
     
     if (existingComment) {
       alert(`A comment already exists for line ${lineNumber}.`);
       return;
     }
-  
-    setComments([...comments, { line: lineNumber, text: comment }]);
-
-    console.log("comments: ", comments);
   };
 
 
   const closePopup = () => {
     setPopupVisible(false);
+    clearSelection()
   };
 
+  function clearSelection() {
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+}
+
+ 
   return (
     <div className="document-container">
       <Link to={"/"}><button className='button-blue margin-low'>Return</button></Link>
@@ -212,13 +255,29 @@ function Document() {
               width: '75%',
             }}
           />
-          <div className='comments-container'>
+                      {tooltipVisible && (
+                <div 
+                    className="tooltip" 
+                    style={{
+                        position: 'absolute', 
+                        left: tooltipPosition.left,
+                        top: tooltipPosition.top,
+                        backgroundColor: 'white', 
+                        border: '1px solid black', 
+                        padding: '5px', 
+                        zIndex: 1000,
+                    }}
+                >
+                    {tooltipContent}
+                </div>
+            )}
+          {/* <div className='comments-container'>
             {comments.map((comment, index) => (
               <div key={index} className='comment' style={{ top: `${(comment.line - 1) * 30}px` }}>
-                <span>Line {comment.line}: {comment.text}</span>
+                <span>Line {comment.line}: {comment.comment}</span>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
         {popupVisible && (
           <CommentPopup 

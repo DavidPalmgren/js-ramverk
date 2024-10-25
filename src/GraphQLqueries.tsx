@@ -16,6 +16,7 @@ export default {
             id
             title
             content
+            comments { id comment line }
           }
         }`;
     },
@@ -40,6 +41,15 @@ export default {
           id
           title
           content
+        }
+      }`;
+    },
+    insertComment: (document: string, comment:string, line: string) => {
+      return `mutation {
+        insertComment(documentId: "${document}", comment: "${comment}", line: "${line}") {
+          id
+          comment
+          line
         }
       }`;
     },

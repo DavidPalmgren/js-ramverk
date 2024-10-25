@@ -46,6 +46,7 @@ function App() {
       const token = localStorage.getItem("Bearer")
       const query = graphQLqueries.createDocument(title);
       console.log('token: ' + token)
+      console.log(query)
       const response = await fetch(`${apiAddress}/query`, {
         headers: {
           "Content-Type": "application/json",

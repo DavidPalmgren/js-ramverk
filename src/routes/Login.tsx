@@ -30,6 +30,9 @@ export default() => {
                 localStorage.setItem('Bearer', token);
                 navigate('/');
                 return;
+            } else {
+                const errorText = await response.text(); // raw is better for debugging lulw
+                console.error(`Error: ${response.status} - ${errorText}`);
             }
             throw new Error();
         } catch (errorMsg) {
