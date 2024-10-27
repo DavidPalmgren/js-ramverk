@@ -3,6 +3,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom';
 import GraphQLqueries from '../GraphQLqueries';
 import postComment from '../api/postComment';
+import { createClient } from 'graphql-ws'
 
 // change to own module maybe?
 const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
@@ -47,6 +48,7 @@ function Document() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const contentRef = useRef(null);
+  const [userId, setUserId] = useState("")
   const { id } = useParams()
 
   //popup hell why am i doing this
@@ -63,11 +65,110 @@ function Document() {
 
   const apiAddress = import.meta.env.VITE_API_ADDRESS
 
+
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const token = localStorage.getItem('Bearer');
+        const query = GraphQLqueries.getUser();
+        const response = await fetch(`${apiAddress}/query`, {
+          method: "POST",
+          body: JSON.stringify({ query }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          }
+        });
+  
+        if (response.ok) {
+          const result = await response.json();
+          setUserId(result.data.user.id);
+          console.log('USER ID2 IS: ', result.data.user.id);
+        }
+      } catch (errorMsg) {
+        console.error(errorMsg);
+      }
+    };
+  
+    fetchUserId();
+  }, [apiAddress]);
+  
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const token = localStorage.getItem('Bearer');
+        const query = GraphQLqueries.getUser();
+        const response = await fetch(`${apiAddress}/query`, {
+          method: "POST",
+          body: JSON.stringify({ query }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          }
+        });
+  
+        if (response.ok) {
+          const result = await response.json();
+          setUserId(result.data.user.id);
+          //console.log('USER ID2 IS: ', result.data.user.id);
+        }
+      } catch (errorMsg) {
+        console.error(errorMsg);
+      }
+    };
+  
+    fetchUserId();
+  }, [apiAddress]);
+  
+  useEffect(() => {
+    if (userId && id) {
+      const client = createClient({
+        url: 'ws://localhost:1337/query'
+      });
+
+      client.on('connected', () => {
+        console.log('WebSocket connected');
+      });
+  
+      const subscription = client.subscribe(
+        {
+          query: `
+              subscription ContentSubscription($documentId: String!, $userId: String!) {
+                  contentSubscription(documentId: $documentId, userId: $userId) {
+                      id
+                      title
+                      content
+                      comments {
+                        id
+                        comment
+                        line
+                      }
+                  }
+              }
+          `,
+          variables: { documentId: id, userId }
+      },
+        {
+          next(data) {
+            console.log('HEJJJJJJJJJJJJJJJJJJJJJ');
+            console.log('New data received ws:', data.data);
+          },
+          error(err) {
+            console.error('error in subscription:', err);
+          },
+          complete() {
+            console.log('subscription completed');
+          }
+        }
+      );
+      console.log('SUBSCRIBO:', subscription)
+    }
+  }, [userId, id]);
+
   useEffect(() => {
     const fetchDocument = async () => {
       try {
         const token = localStorage.getItem('Bearer')
-        console.log('id is defined and is : ', id)
         const query = GraphQLqueries.getDocument(id)
         let result
         const response = await fetch(`${apiAddress}/query`, {
@@ -98,6 +199,7 @@ function Document() {
   }, []);
 
   // Moving to useeffect cause it wasnt working cause setstate is like async??
+  // TODo? Maybe add option to remove a comment
   useEffect(() => {
     const spans = document.querySelectorAll('span.highlight');
     spans.forEach(span => {
