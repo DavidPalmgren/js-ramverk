@@ -48,6 +48,8 @@ function Document() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const contentRef = useRef(null);
+  const [email, setEmail] = useState("")
+
   const [userId, setUserId] = useState("")
   const { id } = useParams()
 
@@ -152,6 +154,12 @@ function Document() {
           next(data) {
             console.log('HEJJJJJJJJJJJJJJJJJJJJJ');
             console.log('New data received ws:', data.data);
+            const newData = data.data.contentSubscription;
+            setTitle(newData.title);
+            setContent(newData.content);
+            setComments(newData.comments);
+            //contentRef.current.innerHTML
+
           },
           error(err) {
             console.error('error in subscription:', err);
@@ -196,7 +204,7 @@ function Document() {
       }
     }
     fetchDocument()
-  }, []);
+  }, [content]);
 
   // Moving to useeffect cause it wasnt working cause setstate is like async??
   // TODo? Maybe add option to remove a comment
@@ -268,9 +276,15 @@ function Document() {
   };
 
 
-  async function updateDocument() {
+  async function updateDocument(newContent:string, newTitle:string) {
     try {
-      const query = GraphQLqueries.updateDocument(id, content, title) // still backwards
+      if (!newTitle) {
+        newTitle = title
+      }
+      if (!newContent) {
+        newContent = content
+      }
+      const query = GraphQLqueries.updateDocument(id, newContent, newTitle) // still backwards
       const token = localStorage.getItem('Bearer')
       
       const response = await fetch (`${apiAddress}/query`, {
@@ -294,8 +308,10 @@ function Document() {
   const handleContentChange = () => {
     if (contentRef.current) {
       setContent(contentRef.current.innerHTML)
+      updateDocument(contentRef.current.innerHTML, false)
     }
   };
+
 
   const handleCommentSubmit = (comment, lineNumber) => {
     const existingComment = comments.find(comment => comment.line === lineNumber);
@@ -328,19 +344,65 @@ function Document() {
   function clearSelection() {
     const selection = window.getSelection();
     selection.removeAllRanges();
-}
+  }
+
+  const handleInvite = async () => {
+    //Quick and dirty style if have time
+    if (!email) {
+      alert('Please enter an email address.');
+      return;
+    }
+    console.log('id exists: ', id)
+    const addUsers = GraphQLqueries.addUsers([email],id) //singular..
+    const token = localStorage.getItem('Bearer')
+
+    try {
+      const response = await fetch(`${apiAddress}/query`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({ query: addUsers }),
+      });
+
+      if (response.ok) {
+        alert('Invitation sent successfully!');
+        setEmail('');
+      } else {
+        const errorText = await response.text();
+        console.log(`Error sending invitation: ${errorText}`)
+        alert(`Error sending invitation: ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Failed to send invitation. Please try again later.');
+    }
+  };
 
  
   return (
     <div className="document-container">
       <Link to={"/"}><button className='button-blue margin-low'>Return</button></Link>
       <button className='button-blue' onClick={updateDocument}>Update</button>
+      <div className="invite-user">
+        <input
+          type="email"
+          placeholder="Enter user email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <button className='button-blue' onClick={handleInvite}>Invite</button>
+      </div>
       <br /><br />
       <div className='single-doc-wrapper'>
         <div className='single-doc-title'>
           <textarea
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              updateDocument(false,e.target.value)
+            }}
           />
         </div>
         <div className='single-doc-content'>

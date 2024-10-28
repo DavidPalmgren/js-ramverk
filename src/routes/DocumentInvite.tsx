@@ -20,9 +20,14 @@ export default () => {
                 if (response.ok) {
                     setStatus('Ok');
                 }
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error(`Error: ${response.status} - ${errorText}`);
+                  }
                 throw new Error();
             } catch (error) {
-                setStatus('Error');
+                console.error(error)
+                setStatus(error);
             }
         })();
 

@@ -36,7 +36,7 @@ const router = createBrowserRouter([
   },
 
   {
-    path:"/documents/invite/:id",
+    path:"/document/invite/:id",
     element: <DocumentInvite/>
   }
 ]);
