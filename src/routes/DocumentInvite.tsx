@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default () => {
     const [status, setStatus] = useState('');
     const { id: inviteToken } = useParams();
+    const navigate = useNavigate()
+
     useEffect(() => {
         (async () => {
             const apiAddress = import.meta.env.VITE_API_ADDRESS;
@@ -28,6 +30,8 @@ export default () => {
             } catch (error) {
                 console.error(error)
                 setStatus(error);
+            } finally {
+                navigate('/')
             }
         })();
 

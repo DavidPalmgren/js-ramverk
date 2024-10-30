@@ -45,7 +45,7 @@ const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
   );
 };
 
-function Document() {
+function CodeEditor() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const contentRef = useRef(null);
@@ -466,6 +466,7 @@ function Document() {
  
   return (
     <div className="document-container">
+      <h1>Code</h1>
       <Link to={"/"}><button className='button-blue margin-low'>Return</button></Link>
       <button className='button-blue' onClick={updateDocument}>Update</button>
       <div className="invite-user">
@@ -541,4 +542,4 @@ function Document() {
 }
 
 
-export default Document
+export default CodeEditor

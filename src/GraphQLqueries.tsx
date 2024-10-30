@@ -16,6 +16,7 @@ export default {
             id
             title
             content
+            comments { id comment line }
           }
         }`;
     },
@@ -28,15 +29,30 @@ export default {
         }`;
     },
 
-    updateDocument: (document: string, title: string, content: string) : string => {
+    updateDocument: (document: string, title: string, content: string): string => {
+      const escapeString = (str: string) => { // There were a bunch of issues with uploading the string so i looked up how to fix it
+        return str.replace(/\\/g, '\\\\') // backslashes
+                  .replace(/"/g, '\\"')   // double quotes
+                  .replace(/\n/g, '\\n'); // newlines
+      };
+    
       return `mutation {
-        updateDocument(document: "${document}", title: "${title}", content: "${content}") {
+        updateDocument(document: "${escapeString(document)}", title: "${escapeString(title)}", content: "${escapeString(content)}") {
           id
           title
           content
         }
       }`;
-  },
+    },
+    insertComment: (document: string, comment:string, line: string) => {
+      return `mutation {
+        insertComment(documentId: "${document}", comment: "${comment}", line: "${line}") {
+          id
+          comment
+          line
+        }
+      }`;
+    },
   addUsers: (users: string[], documentId: string): string => {
     return `mutation {
         inviteUsers(users: [${users.map(user => `"${user}"`).join(', ')}], documentId: "${documentId}")

@@ -12,6 +12,10 @@ import AllDocuments from "./routes/AllDocuments.tsx";
 import './index.css'
 import DocumentInvite from "./routes/DocumentInvite.tsx";
 
+import Potato from './routes/Potato.tsx'
+import Banana from './routes/Banana.tsx'
+import CodeEditor from './routes/CodeEditor.tsx';
+
 
 const router = createBrowserRouter([
   {
@@ -38,6 +42,18 @@ const router = createBrowserRouter([
   {
     path:"/document/invite/:id",
     element: <DocumentInvite/>
+  },
+  {
+    path:"potato/:id",
+    element: <Potato/>
+  },
+  {
+    path:"banana/:id",
+    element: <Banana/>
+  },
+  {
+    path:"code/:id",
+    element: <CodeEditor/>
   }
 ]);
 

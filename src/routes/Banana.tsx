@@ -5,6 +5,10 @@ import GraphQLqueries from '../GraphQLqueries';
 import postComment from '../api/postComment';
 import { createClient } from 'graphql-ws'
 
+import { Editor, EditorState, ContentState } from 'draft-js';
+import 'draft-js/dist/Draft.css';
+
+
 // change to own module maybe?
 const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
   const [comment, setComment] = useState('');
@@ -25,9 +29,8 @@ const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
         top: position.y,
         border: '1px solid #ccc',
         backgroundColor: '#fff',
-        color: 'black',
         padding: '10px',
-        zIndex: 111000,
+        zIndex: 1000,
       }}
     >
       <p>Line {commentLine}</p>
@@ -36,7 +39,7 @@ const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
         onChange={(e) => setComment(e.target.value)}
         rows={3}
         cols={30}
-        placeholder="Add a comment"
+        placeholder="Add a comment..."
       />
       <br />
       <button onClick={handleSubmit}>Submit</button>
@@ -45,15 +48,18 @@ const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
   );
 };
 
-function Document() {
+function Banana() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const contentRef = useRef(null);
   const [email, setEmail] = useState("")
 
+
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+
   const [userId, setUserId] = useState("")
   const { id } = useParams()
-  const cursorPos = useRef([]);
 
   //popup hell why am i doing this
   const [popupVisible, setPopupVisible] = useState(false)
@@ -69,35 +75,6 @@ function Document() {
 
   const apiAddress = import.meta.env.VITE_API_ADDRESS
 
-  let debounceTimeout;
-
-  function setEditorContent(newContent: string, triggerChange: boolean) {
-    const element = document.getElementsByClassName("div-textarea")[0] as HTMLElement | null;
-    // if (!element) return;
-    // With inspiration from jo3l on discord that had same cursor issue
-  
-
-    const selection = window.getSelection();
-    let cursorPosition = 0;
-    if (selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      cursorPosition = range.startOffset;
-    }
-
-    // console.log('Setting content>>>>', newContent)
-    // setContent(content)
-    contentRef.current.innerHTML = newContent
-  
-    // Restore the cursor position
-    const newRange = document.createRange();
-    newRange.setStart(element.childNodes[0], Math.min(cursorPosition, element.childNodes[0].length));
-    newRange.collapse(true);
-  
-    // Clear the current selection and apply the new range
-    selection.removeAllRanges();
-    selection.addRange(newRange);
-  }
-  
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -143,6 +120,7 @@ function Document() {
         if (response.ok) {
           const result = await response.json();
           setUserId(result.data.user.id);
+          //console.log('USER ID2 IS: ', result.data.user.id);
         }
       } catch (errorMsg) {
         console.error(errorMsg);
@@ -162,52 +140,38 @@ function Document() {
         console.log('WebSocket connected');
       });
   
-      const subscription = client.subscribe({
-        query: `
-            subscription ContentSubscription($documentId: String!, $userId: String!) {
-                contentSubscription(documentId: $documentId, userId: $userId) {
-                    Document {
+      const subscription = client.subscribe(
+        {
+          query: `
+              subscription ContentSubscription($documentId: String!, $userId: String!) {
+                  contentSubscription(documentId: $documentId, userId: $userId) {
+                      id
+                      title
+                      content
+                      comments {
                         id
-                        title
-                        content
-                        comments {
-                            id
-                            comment
-                            line
-                        }
-                    }
-                    userIdMakingChange
-                }
-            }
-        `,
-        variables: { documentId: id, userId }
-    },
+                        comment
+                        line
+                      }
+                  }
+              }
+          `,
+          variables: { documentId: id, userId }
+      },
         {
           next(data) {
             console.log('HEJJJJJJJJJJJJJJJJJJJJJ');
-            const newData = data.data.contentSubscription.Document;
-            const newDataFromUser = data.data.contentSubscription.userIdMakingChange
-            console.log('User that made change is: ', newDataFromUser)
-            console.log('newData is: ', newData)
+            console.log('New data received ws:', data.data);
+            const newData = data.data.contentSubscription;
             setTitle(newData.title);
             //setContent(newData.content);
             clearTimeout(debounceTimeout)
+            debounceTimeout = setTimeout(() => {
 
-            // not unessescary saves
-            if (newDataFromUser != userId) { 
-              console.log(newDataFromUser)
-              console.log(userId)
-              debounceTimeout = setTimeout(() => {
-                setEditorContent(newData.content)
-              })
-            }
+              setEditorContent(data.data.contentSubscription.content)
+            })
 
-            if (comments != newData.comments) {
-              setComments(newData.comments);
-              console.log('new comments deteced through ws')
-
-            }
-            console.log('comments set in ws:' , newData.comments)
+            setComments(newData.comments);
             //contentRef.current.innerHTML
 
           },
@@ -242,14 +206,9 @@ function Document() {
           result = await response.json()
           setTitle(result.data.document.title)
           //setContent(result.data.document.content)
-          console.log(result.data)
-          //console.log('IS DATA UNDEFINED AT SETTING POINT?', result.data.document.comments)
-
           setComments(result.data.document.comments)
-
-          if (contentRef.current) {
-            contentRef.current.innerHTML = result.data.document.content;
-          }
+          const contentState = ContentState.createFromText(result.data.document.content);
+          setEditorState(EditorState.createWithContent(contentState));
         }
 
       } catch (errorMsg) {
@@ -261,61 +220,40 @@ function Document() {
 
   // Moving to useeffect cause it wasnt working cause setstate is like async??
   // TODo? Maybe add option to remove a comment
-
-
   useEffect(() => {
-    const timer = setTimeout(() => {
-        console.log('SETTING COMMENTS AGAIN LIKE INTENDED');
-
-        const getCommentById = (commentId: string) => {
-            const comment = comments.find(comment => comment.line === commentId && document.getElementById(commentId));
-            console.log('Finding comment.x.x : ', comment);
-            return comment ? comment.comment : 'No comment found';
-        };
-
-        const spans = document.querySelectorAll('span.highlight');
-        console.log('Num of spans', spans);
-
-        spans.forEach(span => {
-            console.log("span");
-            console.log(span);
-
-            span.addEventListener('mouseover', () => {
-                const commentId = span.id;
-                const comment = getCommentById(commentId);
-                if (comment === 'No comment found') {
-                    return;
-                }
-                setTooltipContent(comment);
-                setTooltipVisible(true);
-
-                const rect = span.getBoundingClientRect();
-                setTooltipPosition({
-                    left: rect.left,
-                    top: rect.bottom + window.scrollY
-                });
-            });
-
-            span.addEventListener('mouseout', () => {
-                setTooltipVisible(false);
+    const spans = document.querySelectorAll('span.highlight');
+    spans.forEach(span => {
+        span.addEventListener('mouseover', () => {
+            const commentId = span.id;
+            const comment = getCommentById(commentId);
+            setTooltipContent(comment);
+            setTooltipVisible(true);
+            
+            const rect = span.getBoundingClientRect();
+            setTooltipPosition({
+                left: rect.left,
+                top: rect.bottom + window.scrollY
             });
         });
-    }, 1000); // Delay of 1s, shit was simply not working because the dom tree wasnt loaded properly this took me like 2hours to fix and i was pulling my hair out
+
+        span.addEventListener('mouseout', () => {
+            setTooltipVisible(false);
+        });
+    });
 
     return () => {
-        clearTimeout(timer);
-        const spans = document.querySelectorAll('span.highlight');
         spans.forEach(span => {
             span.removeEventListener('mouseover', () => {});
             span.removeEventListener('mouseout', () => {});
         });
     };
-}, [comments]);
-
-
-
+  }, [comments]);
   
 
+  const getCommentById = (commentId: string) => {
+    const comment = comments.find(comment => comment.line === commentId);
+    return comment ? comment.comment : 'No comment found';
+  }
 
   const handleDivAreaSelection = (event) => {
     const selection = window.getSelection();
@@ -390,13 +328,7 @@ function Document() {
 
 
   const handleCommentSubmit = (comment, lineNumber) => {
-    console.log('Finding comments.. : ', comments)
-    let existingComment
-
-    if (comments.length > 0) {
-      console.log('this runs')
-      existingComment = comments.length && comments.find(comment => comment.line === lineNumber);
-    }
+    const existingComment = comments.find(comment => comment.line === lineNumber);
 
     if (pendingCommentRange) {
       const timestamp = Date.now().toString()
@@ -407,9 +339,8 @@ function Document() {
       postComment.addComment(id, comment, timestamp)
       pendingCommentRange.surroundContents(span);
 
-      //setComments([...comments, { id: 'temp', comment: comment, line: timestamp }]);
+      setComments([...comments, { id: 'temp', comment: comment, line: timestamp }]);
       clearSelection()
-      updateDocument(contentRef.current.innerHTML, false)
     }
     
     if (existingComment) {
@@ -463,9 +394,23 @@ function Document() {
     }
   };
 
+  //
+
+  //
+  const handleEditorStateChange = (newState) => {
+    setEditorState(newState); // Update the editor state
+  
+    // Get the current content and update the document
+    const contentState = newState.getCurrentContent();
+    const html = contentState.getPlainText(); // Use this if you want plain text, or convert to HTML if needed
+  
+    updateDocument(html, title); // Call updateDocument with the new content
+  };
+ 
  
   return (
     <div className="document-container">
+      <h1>Banana</h1>
       <Link to={"/"}><button className='button-blue margin-low'>Return</button></Link>
       <button className='button-blue' onClick={updateDocument}>Update</button>
       <div className="invite-user">
@@ -489,20 +434,16 @@ function Document() {
           />
         </div>
         <div className='single-doc-content'>
-          <div
-            className='div-textarea'
-            id="FatBalls"
-            contentEditable
-            ref={contentRef}
-            onInput={handleContentChange}
-            onMouseUp={handleDivAreaSelection}
-            style={{
-              padding: '10px',
-              minHeight: '100px',
-              position: 'relative',
-              width: '75%',
-            }}
-          />
+        <Editor
+  editorState={editorState}
+  onEditorStateChange={handleEditorStateChange}
+  onMouseUp={handleDivAreaSelection} // Keep this for comment logic
+  style={{
+    padding: '10px',
+    minHeight: '100px',
+    width: '75%',
+  }}
+/>
                       {tooltipVisible && (
                 <div 
                     className="tooltip" 
@@ -519,13 +460,6 @@ function Document() {
                     {tooltipContent}
                 </div>
             )}
-          {/* <div className='comments-container'>
-            {comments.map((comment, index) => (
-              <div key={index} className='comment' style={{ top: `${(comment.line - 1) * 30}px` }}>
-                <span>Line {comment.line}: {comment.comment}</span>
-              </div>
-            ))}
-          </div> */}
         </div>
         {popupVisible && (
           <CommentPopup 
@@ -541,4 +475,4 @@ function Document() {
 }
 
 
-export default Document
+export default Banana
