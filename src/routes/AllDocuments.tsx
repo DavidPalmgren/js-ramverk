@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import graphQLqueries from '../GraphQLqueries.tsx';
-
+// Unused.. i didnt make it so ill just leave it
 export default () => {
   const [documents, setDocuments] = useState([]);
 

@@ -245,6 +245,7 @@ input:focus {
   margin-bottom: 10px;
 }
 
+/* for login forms only*/
 .button-blue2 {
   background-color: #007bff;
   color: white;

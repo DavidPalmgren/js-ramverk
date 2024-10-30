@@ -383,7 +383,6 @@ function CodeEditor() {
     }
   }
 
-
   const handleCommentSubmit = (comment, lineNumber) => {
     console.log('Finding comments.. : ', comments);
     let existingComment;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-
-export default () => {
+// will just redirect to the other page
+export default function DocumentInvite() {
   const [status, setStatus] = useState('');
   const { id: inviteToken } = useParams();
   const navigate = useNavigate();
