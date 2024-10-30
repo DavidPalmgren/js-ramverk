@@ -59,7 +59,7 @@ export default() => {
                     />
                 </div>
                 {error && <p className="error-message">{error}</p>}
-                <button type="submit" className="button-blue">
+                <button type="submit" className="button-blue2">Sign up
                 </button>
             </form>
         </div>

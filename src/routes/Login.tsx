@@ -3,7 +3,7 @@ import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 
 
-export default() => {
+export default function Login() {
     const [email, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -64,10 +64,11 @@ export default() => {
                         required
                     />
                 </div>
+                <button type="submit" className="button-blue2">Login</button>
+
                 {error && <p className="error-message">{error}</p>}
-                <button type="submit" className="button-blue">
-                </button>
+
             </form>
         </div>
-    );
+    )
 }

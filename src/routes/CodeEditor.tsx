@@ -60,6 +60,8 @@ function CodeEditor() {
   const cursorPos = useRef([]);
 
   const editorRef = useRef(null)
+  const [code, setCode] = useState("")
+  const [codeLog, setCodeLog] = useState("Execute code to view")
 
   //popup hell why am i doing this
   const [popupVisible, setPopupVisible] = useState(false)
@@ -85,7 +87,7 @@ function CodeEditor() {
     return editorRef.current.getValue();
   }
 
-  function setEditorContent(newContent: string, triggerChange: boolean) {
+  function setEditorContent(newContent: string) {
     const element = document.getElementsByClassName("div-textarea")[0] as HTMLElement | null;
     // if (!element) return;
     // With inspiration from jo3l on discord that had same cursor issue
@@ -98,16 +100,14 @@ function CodeEditor() {
       cursorPosition = range.startOffset;
     }
 
-    // console.log('Setting content>>>>', newContent)
     // setContent(content)
     contentRef.current.innerHTML = newContent
   
-    // Restore the cursor position
+
     const newRange = document.createRange();
     newRange.setStart(element.childNodes[0], Math.min(cursorPosition, element.childNodes[0].length));
     newRange.collapse(true);
   
-    // Clear the current selection and apply the new range
     selection.removeAllRanges();
     selection.addRange(newRange);
   }
@@ -255,6 +255,7 @@ function CodeEditor() {
         if (response.ok) {
           result = await response.json()
           setTitle(result.data.document.title)
+          setCode(result.data.document.content)
           //setContent(result.data.document.content)
           console.log(result.data)
           //console.log('IS DATA UNDEFINED AT SETTING POINT?', result.data.document.comments)
@@ -363,6 +364,7 @@ function CodeEditor() {
 
 
   async function updateDocument(newContent:string, newTitle:string) {
+    console.log('this be firing')
     try {
       if (!newTitle) {
         newTitle = title
@@ -491,6 +493,7 @@ function CodeEditor() {
         const res = await response.json()
         console.log('code sent res: ', res)
         const decoded = atob(res.data)
+        setCodeLog(decoded)
         alert(decoded)
       } else {
         const errorText = await response.text();
@@ -501,6 +504,13 @@ function CodeEditor() {
 
     }
   }
+
+  const handleEditorChange = (value) => {
+    console.log('handleEditorChange')
+    console.log('handleEditorChange', typeof(value))
+    setCode(value);
+    updateDocument(value, false)
+};
 
  
   return (
@@ -529,11 +539,12 @@ function CodeEditor() {
           />
 
         </div>
-        <button onClick={sendCode}>Show value</button>
+        <button className='button-blue' onClick={sendCode}>Execute</button>
 
-        <div className='single-doc-content'>
-        <Editor height="90vh" defaultLanguage="javascript" defaultValue="console.log"
+        <div className='single-doc-content' style={{ display: 'block' }}>
+        <Editor height="30vh" defaultLanguage="javascript" value={code}
           onMount={handleEditorDidMount}
+          onChange={handleEditorChange}
         />;
           {/* <div
             className='div-textarea'
@@ -565,6 +576,8 @@ function CodeEditor() {
                     {tooltipContent}
                 </div>
             )}
+        <div style={{backgroundColor: '#008CFF', color: 'white'}}>{codeLog}</div>
+
           {/* <div className='comments-container'>
             {comments.map((comment, index) => (
               <div key={index} className='comment' style={{ top: `${(comment.line - 1) * 30}px` }}>
