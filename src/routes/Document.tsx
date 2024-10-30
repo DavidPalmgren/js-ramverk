@@ -85,11 +85,8 @@ function Document() {
       cursorPosition = range.startOffset;
     }
 
-    // console.log('Setting content>>>>', newContent)
-    // setContent(content)
     contentRef.current.innerHTML = newContent;
 
-    // Restore the cursor position
     const newRange = document.createRange();
     newRange.setStart(
       element.childNodes[0],
@@ -97,7 +94,6 @@ function Document() {
     );
     newRange.collapse(true);
 
-    // Clear the current selection and apply the new range
     selection.removeAllRanges();
     selection.addRange(newRange);
   }
@@ -189,17 +185,12 @@ function Document() {
         },
         {
           next(data) {
-            console.log('HEJJJJJJJJJJJJJJJJJJJJJ');
             const newData = data.data.contentSubscription.Document;
             const newDataFromUser =
               data.data.contentSubscription.userIdMakingChange;
-            console.log('User that made change is: ', newDataFromUser);
-            console.log('newData is: ', newData);
             setTitle(newData.title);
-            //setContent(newData.content);
             clearTimeout(debounceTimeout);
 
-            // not unessescary saves
             if (newDataFromUser != userId) {
               console.log(newDataFromUser);
               console.log(userId);
@@ -210,10 +201,7 @@ function Document() {
 
             if (comments != newData.comments) {
               setComments(newData.comments);
-              console.log('new comments deteced through ws');
             }
-            console.log('comments set in ws:', newData.comments);
-            //contentRef.current.innerHTML
           },
           error(err) {
             console.error('error in subscription:', err);
@@ -245,9 +233,7 @@ function Document() {
         if (response.ok) {
           result = await response.json();
           setTitle(result.data.document.title);
-          //setContent(result.data.document.content)
           console.log(result.data);
-          //console.log('IS DATA UNDEFINED AT SETTING POINT?', result.data.document.comments)
 
           setComments(result.data.document.comments);
 
@@ -261,9 +247,6 @@ function Document() {
     };
     fetchDocument();
   }, []);
-
-  // Moving to useeffect cause it wasnt working cause setstate is like async??
-  // TODo? Maybe add option to remove a comment
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -372,8 +355,6 @@ function Document() {
         const errorText = await response.text();
         console.error(`Error: ${response.status} - ${errorText}`);
         return;
-      } else {
-        //console.log(response)
       }
     } catch (errorMsg) {
       console.error(errorMsg);
@@ -383,9 +364,6 @@ function Document() {
   const handleContentChange = () => {
     if (contentRef.current) {
       updateDocument(contentRef.current.innerHTML, false);
-
-      //setEditorContent(contentRef.current.innerHTML)
-      //setContent(contentRef.current.innerHTML)
     }
   };
 
@@ -408,8 +386,6 @@ function Document() {
       span.setAttribute('id', timestamp);
       postComment.addComment(id, comment, timestamp);
       pendingCommentRange.surroundContents(span);
-
-      //setComments([...comments, { id: 'temp', comment: comment, line: timestamp }]);
       clearSelection();
       updateDocument(contentRef.current.innerHTML, false);
     }
@@ -526,13 +502,6 @@ function Document() {
               {tooltipContent}
             </div>
           )}
-          {/* <div className='comments-container'>
-            {comments.map((comment, index) => (
-              <div key={index} className='comment' style={{ top: `${(comment.line - 1) * 30}px` }}>
-                <span>Line {comment.line}: {comment.comment}</span>
-              </div>
-            ))}
-          </div> */}
         </div>
         {popupVisible && (
           <CommentPopup

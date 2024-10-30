@@ -99,7 +99,6 @@ function CodeEditor() {
       cursorPosition = range.startOffset;
     }
 
-    // setContent(content)
     contentRef.current.innerHTML = newContent;
 
     const newRange = document.createRange();
@@ -199,20 +198,15 @@ function CodeEditor() {
         },
         {
           next(data) {
-            console.log('HEJJJJJJJJJJJJJJJJJJJJJ');
             const newData = data.data.contentSubscription.Document;
             const newDataFromUser =
               data.data.contentSubscription.userIdMakingChange;
-            console.log('User that made change is: ', newDataFromUser);
-            console.log('newData is: ', newData);
+
             setTitle(newData.title);
-            //setContent(newData.content);
             clearTimeout(debounceTimeout);
 
             // not unessescary saves
             if (newDataFromUser != userId) {
-              console.log(newDataFromUser);
-              console.log(userId);
               debounceTimeout = setTimeout(() => {
                 setEditorContent(newData.content);
               });
@@ -223,7 +217,6 @@ function CodeEditor() {
               console.log('new comments deteced through ws');
             }
             console.log('comments set in ws:', newData.comments);
-            //contentRef.current.innerHTML
           },
           error(err) {
             console.error('error in subscription:', err);
@@ -390,14 +383,6 @@ function CodeEditor() {
     }
   }
 
-  const handleContentChange = () => {
-    if (contentRef.current) {
-      updateDocument(contentRef.current.innerHTML, false);
-
-      //setEditorContent(contentRef.current.innerHTML)
-      //setContent(contentRef.current.innerHTML)
-    }
-  };
 
   const handleCommentSubmit = (comment, lineNumber) => {
     console.log('Finding comments.. : ', comments);
@@ -418,8 +403,6 @@ function CodeEditor() {
       span.setAttribute('id', timestamp);
       postComment.addComment(id, comment, timestamp);
       pendingCommentRange.surroundContents(span);
-
-      //setComments([...comments, { id: 'temp', comment: comment, line: timestamp }]);
       clearSelection();
       updateDocument(contentRef.current.innerHTML, false);
     }
@@ -552,20 +535,6 @@ function CodeEditor() {
             onChange={handleEditorChange}
           />
           ;
-          {/* <div
-            className='div-textarea'
-            id="FatBalls"
-            contentEditable
-            ref={contentRef}
-            onInput={handleContentChange}
-            onMouseUp={handleDivAreaSelection}
-            style={{
-              padding: '10px',
-              minHeight: '100px',
-              position: 'relative',
-              width: '75%',
-            }}
-          /> */}
           {tooltipVisible && (
             <div
               className="tooltip"
@@ -585,13 +554,6 @@ function CodeEditor() {
           <div style={{ backgroundColor: '#008CFF', color: 'white' }}>
             {codeLog}
           </div>
-          {/* <div className='comments-container'>
-            {comments.map((comment, index) => (
-              <div key={index} className='comment' style={{ top: `${(comment.line - 1) * 30}px` }}>
-                <span>Line {comment.line}: {comment.comment}</span>
-              </div>
-            ))}
-          </div> */}
         </div>
         {popupVisible && (
           <CommentPopup

@@ -110,7 +110,7 @@ function App() {
       </div>
       <div className="doc-container">
         {documents.map((doc) => {
-          const linkPath = doc.code ? `/code/${doc.id}` : doc.id; // Change the link based on the `code` value
+          const linkPath = doc.code ? `/code/${doc.id}` : doc.id; // Changes the link based on the boolean code value
 
           return (
             <Link to={linkPath} key={doc.id}>
