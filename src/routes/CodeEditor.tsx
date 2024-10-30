@@ -5,6 +5,8 @@ import GraphQLqueries from '../GraphQLqueries';
 import postComment from '../api/postComment';
 import { createClient } from 'graphql-ws'
 
+import Editor from '@monaco-editor/react';
+
 // change to own module maybe?
 const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
   const [comment, setComment] = useState('');
@@ -45,6 +47,8 @@ const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
   );
 };
 
+
+
 function CodeEditor() {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
@@ -54,6 +58,8 @@ function CodeEditor() {
   const [userId, setUserId] = useState("")
   const { id } = useParams()
   const cursorPos = useRef([]);
+
+  const editorRef = useRef(null)
 
   //popup hell why am i doing this
   const [popupVisible, setPopupVisible] = useState(false)
@@ -70,6 +76,14 @@ function CodeEditor() {
   const apiAddress = import.meta.env.VITE_API_ADDRESS
 
   let debounceTimeout;
+
+  function handleEditorDidMount(editor, monaco) {
+    editorRef.current = editor;
+  }
+
+  function getValue() {
+    return editorRef.current.getValue();
+  }
 
   function setEditorContent(newContent: string, triggerChange: boolean) {
     const element = document.getElementsByClassName("div-textarea")[0] as HTMLElement | null;
@@ -274,11 +288,9 @@ function CodeEditor() {
         };
 
         const spans = document.querySelectorAll('span.highlight');
-        console.log('Num of spans', spans);
 
         spans.forEach(span => {
-            console.log("span");
-            console.log(span);
+
 
             span.addEventListener('mouseover', () => {
                 const commentId = span.id;
@@ -463,6 +475,33 @@ function CodeEditor() {
     }
   };
 
+  async function sendCode() {
+
+    try {
+      const response = await fetch(`https://execjs.emilfolino.se/code`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ code: btoa(getValue()) }),
+      });
+
+      if (response.ok) {
+        console.log('response ok')
+        const res = await response.json()
+        console.log('code sent res: ', res)
+        const decoded = atob(res.data)
+        alert(decoded)
+      } else {
+        const errorText = await response.text();
+        console.log(`Error sending code: ${errorText}`)
+      }
+    } catch (error) {
+      console.error('Error:', error);
+
+    }
+  }
+
  
   return (
     <div className="document-container">
@@ -488,9 +527,15 @@ function CodeEditor() {
               updateDocument(false,e.target.value)
             }}
           />
+
         </div>
+        <button onClick={sendCode}>Show value</button>
+
         <div className='single-doc-content'>
-          <div
+        <Editor height="90vh" defaultLanguage="javascript" defaultValue="console.log"
+          onMount={handleEditorDidMount}
+        />;
+          {/* <div
             className='div-textarea'
             id="FatBalls"
             contentEditable
@@ -503,7 +548,7 @@ function CodeEditor() {
               position: 'relative',
               width: '75%',
             }}
-          />
+          /> */}
                       {tooltipVisible && (
                 <div 
                     className="tooltip" 

@@ -11,33 +11,32 @@ function App() {
   const [createToggle, setCreateToggle] = useState(false)
   const [title, setTitle] = useState("")
 
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      try {
-        const token = localStorage.getItem("Bearer")
-        const query = graphQLqueries.getUser();
-        const response = await fetch(`${apiAddress}/query`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": token
-          },
-          body: JSON.stringify({ query })
-        });
-  
-        if (response.ok) {
-          const data = await response.json();
-          setDocuments(data.data.user.documents);
-          console.log(data.data.user.documents)
-        } else {
-          const errorText = await response.text();
-          console.error(`Error: ${response.status} ,  ${errorText}`);
-        }
-      } catch (errorMsg) {
-        console.error(errorMsg);
+  const fetchDocuments = async () => {
+    try {
+      const token = localStorage.getItem("Bearer")
+      const query = graphQLqueries.getUser();
+      const response = await fetch(`${apiAddress}/query`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token
+        },
+        body: JSON.stringify({ query })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setDocuments(data.data.user.documents);
+      } else {
+        const errorText = await response.text();
+        console.error(`Error: ${response.status} ,  ${errorText}`);
       }
-    };
-  
+    } catch (errorMsg) {
+      console.error(errorMsg);
+    }
+  };
+
+  useEffect(() => {
     fetchDocuments();
   }, []);
 
@@ -45,8 +44,6 @@ function App() {
     try {
       const token = localStorage.getItem("Bearer")
       const query = graphQLqueries.createDocument(title);
-      console.log('token: ' + token)
-      console.log(query)
       const response = await fetch(`${apiAddress}/query`, {
         headers: {
           "Content-Type": "application/json",
@@ -56,13 +53,13 @@ function App() {
         method: "POST"
       })
       if (!response.ok) {
-        const errorText = await response.text(); // raw is better for debugging lulw
-        console.error(`Error: ${response.status} - ${errorText}`);
+        const errorText = await response.text();
+        console.error(`Error: ${response.status}: ${errorText}`);
         return;
       }
-      console.log(response)
-      const data = await response.json()
-      console.log(`Document has been created succesfully :), ${data}`)
+      if (response.ok) {
+        fetchDocuments();
+      }
     } catch (errorMsg) {
       console.error(errorMsg)
     }
@@ -98,7 +95,8 @@ function App() {
       </div>
       <div className='doc-container'>
       {documents.map(doc => (
-        <Link to={doc.id}>
+        <Link to={doc.id} key={doc.id}>
+          
         <div className='doc-mini' key={doc.id}>
           <p className='doc-title'>
             {doc.title}

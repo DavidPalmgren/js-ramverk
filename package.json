@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
+    "codemirror": "^6.0.1",
     "draft-js": "^0.11.7",
     "graphql-ws": "^5.16.0",
     "react": "^18.3.1",
