@@ -6,6 +6,8 @@ export default {
             documents {
               id
               title
+              content
+              code
             }
           }
         }`
@@ -16,15 +18,17 @@ export default {
             id
             title
             content
+            code
             comments { id comment line }
           }
         }`;
     },
-    createDocument: (title: string) => {
+    createDocument: (title: string, code: boolean) => {
         return `mutation {
-          createDocument(title: "${title}") {
+          createDocument(title: "${title}", code: ${code}) {
             id
             title
+            code
           }
         }`;
     },
