@@ -1,64 +1,60 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-import App from './App.tsx'
-import Document from './routes/Document.tsx'
-import CreateAccount from "./routes/CreateAccount.tsx";
-import Login from "./routes/Login.tsx";
-import AllDocuments from "./routes/AllDocuments.tsx";
-import './index.css'
-import DocumentInvite from "./routes/DocumentInvite.tsx";
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import App from './App.tsx';
+import Document from './routes/Document.tsx';
+import CreateAccount from './routes/CreateAccount.tsx';
+import Login from './routes/Login.tsx';
+import AllDocuments from './routes/AllDocuments.tsx';
+import './index.css';
+import DocumentInvite from './routes/DocumentInvite.tsx';
 
-import Potato from './routes/Potato.tsx'
-import Banana from './routes/Banana.tsx'
+import Potato from './routes/Potato.tsx';
+import Banana from './routes/Banana.tsx';
 import CodeEditor from './routes/CodeEditor.tsx';
-
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <App/>
+    path: '/',
+    element: <App />,
   },
   {
-    path: "/:id",
-    element: <Document/>
+    path: '/:id',
+    element: <Document />,
   },
   {
-    path: "/signup",
-    element: <CreateAccount/>
+    path: '/signup',
+    element: <CreateAccount />,
   },
   {
-    path: "/login",
-    element: <Login/>
+    path: '/login',
+    element: <Login />,
   },
   {
-    path:"/documents",
-    element: <AllDocuments/>
+    path: '/documents',
+    element: <AllDocuments />,
   },
 
   {
-    path:"/document/invite/:id",
-    element: <DocumentInvite/>
+    path: '/document/invite/:id',
+    element: <DocumentInvite />,
   },
   {
-    path:"potato/:id",
-    element: <Potato/>
+    path: 'potato/:id',
+    element: <Potato />,
   },
   {
-    path:"banana/:id",
-    element: <Banana/>
+    path: 'banana/:id',
+    element: <Banana />,
   },
   {
-    path:"code/:id",
-    element: <CodeEditor/>
-  }
+    path: 'code/:id',
+    element: <CodeEditor />,
+  },
 ]);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>,
-)
+  </StrictMode>
+);

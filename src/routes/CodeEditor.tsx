@@ -1,9 +1,9 @@
-import '../assets/App.css'
-import { useEffect, useState, useRef } from 'react'
+import '../assets/App.css';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import GraphQLqueries from '../GraphQLqueries';
 import postComment from '../api/postComment';
-import { createClient } from 'graphql-ws'
+import { createClient } from 'graphql-ws';
 
 import Editor from '@monaco-editor/react';
 
@@ -20,7 +20,7 @@ const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
   };
 
   return (
-    <div 
+    <div
       style={{
         position: 'absolute',
         left: position.x,
@@ -47,35 +47,33 @@ const CommentPopup = ({ position, onClose, onCommentSubmit, commentLine }) => {
   );
 };
 
-
-
 function CodeEditor() {
-  const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   const contentRef = useRef(null);
-  const [email, setEmail] = useState("")
+  const [email, setEmail] = useState('');
 
-  const [userId, setUserId] = useState("")
-  const { id } = useParams()
+  const [userId, setUserId] = useState('');
+  const { id } = useParams();
   const cursorPos = useRef([]);
 
-  const editorRef = useRef(null)
-  const [code, setCode] = useState("")
-  const [codeLog, setCodeLog] = useState("Execute code to view")
+  const editorRef = useRef(null);
+  const [code, setCode] = useState('');
+  const [codeLog, setCodeLog] = useState('Execute code to view');
 
   //popup hell why am i doing this
-  const [popupVisible, setPopupVisible] = useState(false)
-  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 })
+  const [popupVisible, setPopupVisible] = useState(false);
+  const [popupPosition, setPopupPosition] = useState({ x: 0, y: 0 });
 
   const [tooltipContent, setTooltipContent] = useState('');
   const [tooltipVisible, setTooltipVisible] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ left: 0, top: 0 });
 
-  const [comments, setComments] = useState([])
-  const [currCommentLine, setCurrCommentLine] = useState(0)
-  const [pendingCommentRange, setPendingCommentRange] = useState(null)
+  const [comments, setComments] = useState([]);
+  const [currCommentLine, setCurrCommentLine] = useState(0);
+  const [pendingCommentRange, setPendingCommentRange] = useState(null);
 
-  const apiAddress = import.meta.env.VITE_API_ADDRESS
+  const apiAddress = import.meta.env.VITE_API_ADDRESS;
 
   let debounceTimeout;
 
@@ -88,10 +86,11 @@ function CodeEditor() {
   }
 
   function setEditorContent(newContent: string) {
-    const element = document.getElementsByClassName("div-textarea")[0] as HTMLElement | null;
+    const element = document.getElementsByClassName(
+      'div-textarea'
+    )[0] as HTMLElement | null;
     // if (!element) return;
     // With inspiration from jo3l on discord that had same cursor issue
-  
 
     const selection = window.getSelection();
     let cursorPosition = 0;
@@ -101,17 +100,18 @@ function CodeEditor() {
     }
 
     // setContent(content)
-    contentRef.current.innerHTML = newContent
-  
+    contentRef.current.innerHTML = newContent;
 
     const newRange = document.createRange();
-    newRange.setStart(element.childNodes[0], Math.min(cursorPosition, element.childNodes[0].length));
+    newRange.setStart(
+      element.childNodes[0],
+      Math.min(cursorPosition, element.childNodes[0].length)
+    );
     newRange.collapse(true);
-  
+
     selection.removeAllRanges();
     selection.addRange(newRange);
   }
-  
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -119,14 +119,14 @@ function CodeEditor() {
         const token = localStorage.getItem('Bearer');
         const query = GraphQLqueries.getUser();
         const response = await fetch(`${apiAddress}/query`, {
-          method: "POST",
+          method: 'POST',
           body: JSON.stringify({ query }),
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': token
-          }
+            Authorization: token,
+          },
         });
-  
+
         if (response.ok) {
           const result = await response.json();
           setUserId(result.data.user.id);
@@ -136,24 +136,24 @@ function CodeEditor() {
         console.error(errorMsg);
       }
     };
-  
+
     fetchUserId();
   }, [apiAddress]);
-  
+
   useEffect(() => {
     const fetchUserId = async () => {
       try {
         const token = localStorage.getItem('Bearer');
         const query = GraphQLqueries.getUser();
         const response = await fetch(`${apiAddress}/query`, {
-          method: "POST",
+          method: 'POST',
           body: JSON.stringify({ query }),
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': token
-          }
+            Authorization: token,
+          },
         });
-  
+
         if (response.ok) {
           const result = await response.json();
           setUserId(result.data.user.id);
@@ -162,22 +162,23 @@ function CodeEditor() {
         console.error(errorMsg);
       }
     };
-  
+
     fetchUserId();
   }, [apiAddress]);
-  
+
   useEffect(() => {
     if (userId && id) {
       const client = createClient({
-        url: 'ws://localhost:1337/query'
+        url: 'ws://localhost:1337/query',
       });
 
       client.on('connected', () => {
         console.log('WebSocket connected');
       });
-  
-      const subscription = client.subscribe({
-        query: `
+
+      const subscription = client.subscribe(
+        {
+          query: `
             subscription ContentSubscription($documentId: String!, $userId: String!) {
                 contentSubscription(documentId: $documentId, userId: $userId) {
                     Document {
@@ -194,248 +195,244 @@ function CodeEditor() {
                 }
             }
         `,
-        variables: { documentId: id, userId }
-    },
+          variables: { documentId: id, userId },
+        },
         {
           next(data) {
             console.log('HEJJJJJJJJJJJJJJJJJJJJJ');
             const newData = data.data.contentSubscription.Document;
-            const newDataFromUser = data.data.contentSubscription.userIdMakingChange
-            console.log('User that made change is: ', newDataFromUser)
-            console.log('newData is: ', newData)
+            const newDataFromUser =
+              data.data.contentSubscription.userIdMakingChange;
+            console.log('User that made change is: ', newDataFromUser);
+            console.log('newData is: ', newData);
             setTitle(newData.title);
             //setContent(newData.content);
-            clearTimeout(debounceTimeout)
+            clearTimeout(debounceTimeout);
 
             // not unessescary saves
-            if (newDataFromUser != userId) { 
-              console.log(newDataFromUser)
-              console.log(userId)
+            if (newDataFromUser != userId) {
+              console.log(newDataFromUser);
+              console.log(userId);
               debounceTimeout = setTimeout(() => {
-                setEditorContent(newData.content)
-              })
+                setEditorContent(newData.content);
+              });
             }
 
             if (comments != newData.comments) {
               setComments(newData.comments);
-              console.log('new comments deteced through ws')
-
+              console.log('new comments deteced through ws');
             }
-            console.log('comments set in ws:' , newData.comments)
+            console.log('comments set in ws:', newData.comments);
             //contentRef.current.innerHTML
-
           },
           error(err) {
             console.error('error in subscription:', err);
           },
           complete() {
             console.log('subscription completed');
-          }
+          },
         }
       );
-      console.log('SUBSCRIBO:', subscription)
+      console.log('SUBSCRIBO:', subscription);
     }
   }, [userId, id]);
 
   useEffect(() => {
     const fetchDocument = async () => {
       try {
-        const token = localStorage.getItem('Bearer')
-        const query = GraphQLqueries.getDocument(id)
-        let result
+        const token = localStorage.getItem('Bearer');
+        const query = GraphQLqueries.getDocument(id);
+        let result;
         const response = await fetch(`${apiAddress}/query`, {
-          method: "POST",
+          method: 'POST',
           body: JSON.stringify({ query }),
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': token
-          }
-        })
+            Authorization: token,
+          },
+        });
 
         if (response.ok) {
-          result = await response.json()
-          setTitle(result.data.document.title)
-          setCode(result.data.document.content)
+          result = await response.json();
+          setTitle(result.data.document.title);
+          setCode(result.data.document.content);
           //setContent(result.data.document.content)
-          console.log(result.data)
+          console.log(result.data);
           //console.log('IS DATA UNDEFINED AT SETTING POINT?', result.data.document.comments)
 
-          setComments(result.data.document.comments)
+          setComments(result.data.document.comments);
 
           if (contentRef.current) {
             contentRef.current.innerHTML = result.data.document.content;
           }
         }
-
       } catch (errorMsg) {
-        console.error(errorMsg)
+        console.error(errorMsg);
       }
-    }
-    fetchDocument()
+    };
+    fetchDocument();
   }, []);
 
   // Moving to useeffect cause it wasnt working cause setstate is like async??
   // TODo? Maybe add option to remove a comment
 
-
   useEffect(() => {
     const timer = setTimeout(() => {
-        console.log('SETTING COMMENTS AGAIN LIKE INTENDED');
+      console.log('SETTING COMMENTS AGAIN LIKE INTENDED');
 
-        const getCommentById = (commentId: string) => {
-            const comment = comments.find(comment => comment.line === commentId && document.getElementById(commentId));
-            console.log('Finding comment.x.x : ', comment);
-            return comment ? comment.comment : 'No comment found';
-        };
+      const getCommentById = (commentId: string) => {
+        const comment = comments.find(
+          (comment) =>
+            comment.line === commentId && document.getElementById(commentId)
+        );
+        console.log('Finding comment.x.x : ', comment);
+        return comment ? comment.comment : 'No comment found';
+      };
 
-        const spans = document.querySelectorAll('span.highlight');
+      const spans = document.querySelectorAll('span.highlight');
 
-        spans.forEach(span => {
+      spans.forEach((span) => {
+        span.addEventListener('mouseover', () => {
+          const commentId = span.id;
+          const comment = getCommentById(commentId);
+          if (comment === 'No comment found') {
+            return;
+          }
+          setTooltipContent(comment);
+          setTooltipVisible(true);
 
-
-            span.addEventListener('mouseover', () => {
-                const commentId = span.id;
-                const comment = getCommentById(commentId);
-                if (comment === 'No comment found') {
-                    return;
-                }
-                setTooltipContent(comment);
-                setTooltipVisible(true);
-
-                const rect = span.getBoundingClientRect();
-                setTooltipPosition({
-                    left: rect.left,
-                    top: rect.bottom + window.scrollY
-                });
-            });
-
-            span.addEventListener('mouseout', () => {
-                setTooltipVisible(false);
-            });
+          const rect = span.getBoundingClientRect();
+          setTooltipPosition({
+            left: rect.left,
+            top: rect.bottom + window.scrollY,
+          });
         });
+
+        span.addEventListener('mouseout', () => {
+          setTooltipVisible(false);
+        });
+      });
     }, 1000); // Delay of 1s, shit was simply not working because the dom tree wasnt loaded properly this took me like 2hours to fix and i was pulling my hair out
 
     return () => {
-        clearTimeout(timer);
-        const spans = document.querySelectorAll('span.highlight');
-        spans.forEach(span => {
-            span.removeEventListener('mouseover', () => {});
-            span.removeEventListener('mouseout', () => {});
-        });
+      clearTimeout(timer);
+      const spans = document.querySelectorAll('span.highlight');
+      spans.forEach((span) => {
+        span.removeEventListener('mouseover', () => {});
+        span.removeEventListener('mouseout', () => {});
+      });
     };
-}, [comments]);
-
-
-
-  
-
+  }, [comments]);
 
   const handleDivAreaSelection = (event) => {
     const selection = window.getSelection();
     const selectedText = selection.toString();
-    const mainDiv = document.getElementsByClassName("div-textarea")[0];
+    const mainDiv = document.getElementsByClassName('div-textarea')[0];
     const children = mainDiv.children;
-  
+
     if (selectedText) {
       let found;
       const range = selection.getRangeAt(0);
       const startNode = range.startContainer;
-  
-      for (let i = 0; i < children.length; i++) { //remove all this later
+
+      for (let i = 0; i < children.length; i++) {
+        //remove all this later
         if (children[i].contains(startNode)) {
           found = true;
           setCurrCommentLine(i + 2);
-          console.log("Selected line: ", i + 2, children[i].innerHTML);
+          console.log('Selected line: ', i + 2, children[i].innerHTML);
           break;
         }
       }
 
-      setPendingCommentRange(range)
+      setPendingCommentRange(range);
 
       const rect = range.getBoundingClientRect();
-      setPopupPosition({ x: rect.left + window.scrollX, y: rect.bottom + window.scrollY });
+      setPopupPosition({
+        x: rect.left + window.scrollX,
+        y: rect.bottom + window.scrollY,
+      });
       setPopupVisible(true);
-  
+
       if (!found) {
         setCurrCommentLine(1); // Set to 1 for first line this shit still buggy af
       }
     }
   };
 
-
-  async function updateDocument(newContent:string, newTitle:string) {
-    console.log('this be firing')
+  async function updateDocument(newContent: string, newTitle: string) {
+    console.log('this be firing');
     try {
       if (!newTitle) {
-        newTitle = title
+        newTitle = title;
       }
       if (!newContent) {
-        newContent = content
+        newContent = content;
       }
-      const query = GraphQLqueries.updateDocument(id, newContent, newTitle) // still backwards
-      const token = localStorage.getItem('Bearer')
-      
-      const response = await fetch (`${apiAddress}/query`, {
+      const query = GraphQLqueries.updateDocument(id, newContent, newTitle); // still backwards
+      const token = localStorage.getItem('Bearer');
+
+      const response = await fetch(`${apiAddress}/query`, {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token
+          Authorization: token,
         },
         body: JSON.stringify({ query }),
-        method: "POST"
-      })
+        method: 'POST',
+      });
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`Error: ${response.status} - ${errorText}`);
         return;
       }
     } catch (errorMsg) {
-      console.error(errorMsg)
+      console.error(errorMsg);
     }
   }
 
   const handleContentChange = () => {
     if (contentRef.current) {
-      updateDocument(contentRef.current.innerHTML, false)
+      updateDocument(contentRef.current.innerHTML, false);
 
       //setEditorContent(contentRef.current.innerHTML)
       //setContent(contentRef.current.innerHTML)
     }
   };
 
-
   const handleCommentSubmit = (comment, lineNumber) => {
-    console.log('Finding comments.. : ', comments)
-    let existingComment
+    console.log('Finding comments.. : ', comments);
+    let existingComment;
 
     if (comments.length > 0) {
-      console.log('this runs')
-      existingComment = comments.length && comments.find(comment => comment.line === lineNumber);
+      console.log('this runs');
+      existingComment =
+        comments.length &&
+        comments.find((comment) => comment.line === lineNumber);
     }
 
     if (pendingCommentRange) {
-      const timestamp = Date.now().toString()
-      const span = document.createElement("span");
+      const timestamp = Date.now().toString();
+      const span = document.createElement('span');
 
-      span.classList.add("highlight");
-      span.setAttribute('id', timestamp)
-      postComment.addComment(id, comment, timestamp)
+      span.classList.add('highlight');
+      span.setAttribute('id', timestamp);
+      postComment.addComment(id, comment, timestamp);
       pendingCommentRange.surroundContents(span);
 
       //setComments([...comments, { id: 'temp', comment: comment, line: timestamp }]);
-      clearSelection()
-      updateDocument(contentRef.current.innerHTML, false)
+      clearSelection();
+      updateDocument(contentRef.current.innerHTML, false);
     }
-    
+
     if (existingComment) {
       alert(`A comment already exists for line ${lineNumber}.`);
       return;
     }
   };
 
-
   const closePopup = () => {
     setPopupVisible(false);
-    clearSelection()
+    clearSelection();
   };
 
   function clearSelection() {
@@ -449,16 +446,16 @@ function CodeEditor() {
       alert('Please enter an email address.');
       return;
     }
-    console.log('id exists: ', id)
-    const addUsers = GraphQLqueries.addUsers([email],id) //singular..
-    const token = localStorage.getItem('Bearer')
+    console.log('id exists: ', id);
+    const addUsers = GraphQLqueries.addUsers([email], id); //singular..
+    const token = localStorage.getItem('Bearer');
 
     try {
       const response = await fetch(`${apiAddress}/query`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token
+          Authorization: token,
         },
         body: JSON.stringify({ query: addUsers }),
       });
@@ -468,7 +465,7 @@ function CodeEditor() {
         setEmail('');
       } else {
         const errorText = await response.text();
-        console.log(`Error sending invitation: ${errorText}`)
+        console.log(`Error sending invitation: ${errorText}`);
         alert(`Error sending invitation: ${errorText}`);
       }
     } catch (error) {
@@ -478,46 +475,47 @@ function CodeEditor() {
   };
 
   async function sendCode() {
-
     try {
       const response = await fetch(`https://execjs.emilfolino.se/code`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ code: btoa(getValue()) }),
       });
 
       if (response.ok) {
-        console.log('response ok')
-        const res = await response.json()
-        console.log('code sent res: ', res)
-        const decoded = atob(res.data)
-        setCodeLog(decoded)
-        alert(decoded)
+        console.log('response ok');
+        const res = await response.json();
+        console.log('code sent res: ', res);
+        const decoded = atob(res.data);
+        setCodeLog(decoded);
+        alert(decoded);
       } else {
         const errorText = await response.text();
-        console.log(`Error sending code: ${errorText}`)
+        console.log(`Error sending code: ${errorText}`);
       }
     } catch (error) {
       console.error('Error:', error);
-
     }
   }
 
   const handleEditorChange = (value) => {
-    console.log('handleEditorChange')
-    console.log('handleEditorChange', typeof(value))
+    console.log('handleEditorChange');
+    console.log('handleEditorChange', typeof value);
     setCode(value);
-    updateDocument(value, false)
-};
+    updateDocument(value, false);
+  };
 
- 
   return (
     <div className="document-container">
       <h1>Code</h1>
-      <Link to={"/"}><button className='button-blue margin-low'>Return</button></Link>
-      <button className='button-blue' onClick={updateDocument}>Update</button>
+      <Link to={'/'}>
+        <button className="button-blue margin-low">Return</button>
+      </Link>
+      <button className="button-blue" onClick={updateDocument}>
+        Update
+      </button>
       <div className="invite-user">
         <input
           type="email"
@@ -525,27 +523,35 @@ function CodeEditor() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <button className='button-blue' onClick={handleInvite}>Invite</button>
+        <button className="button-blue" onClick={handleInvite}>
+          Invite
+        </button>
       </div>
-      <br /><br />
-      <div className='single-doc-wrapper'>
-        <div className='single-doc-title'>
+      <br />
+      <br />
+      <div className="single-doc-wrapper">
+        <div className="single-doc-title">
           <textarea
             value={title}
             onChange={(e) => {
               setTitle(e.target.value);
-              updateDocument(false,e.target.value)
+              updateDocument(false, e.target.value);
             }}
           />
-
         </div>
-        <button className='button-blue' onClick={sendCode}>Execute</button>
+        <button className="button-blue" onClick={sendCode}>
+          Execute
+        </button>
 
-        <div className='single-doc-content' style={{ display: 'block' }}>
-        <Editor height="30vh" defaultLanguage="javascript" value={code}
-          onMount={handleEditorDidMount}
-          onChange={handleEditorChange}
-        />;
+        <div className="single-doc-content" style={{ display: 'block' }}>
+          <Editor
+            height="30vh"
+            defaultLanguage="javascript"
+            value={code}
+            onMount={handleEditorDidMount}
+            onChange={handleEditorChange}
+          />
+          ;
           {/* <div
             className='div-textarea'
             id="FatBalls"
@@ -560,24 +566,25 @@ function CodeEditor() {
               width: '75%',
             }}
           /> */}
-                      {tooltipVisible && (
-                <div 
-                    className="tooltip" 
-                    style={{
-                        position: 'absolute', 
-                        left: tooltipPosition.left,
-                        top: tooltipPosition.top,
-                        backgroundColor: 'white', 
-                        border: '1px solid black', 
-                        padding: '5px', 
-                        zIndex: 1000,
-                    }}
-                >
-                    {tooltipContent}
-                </div>
-            )}
-        <div style={{backgroundColor: '#008CFF', color: 'white'}}>{codeLog}</div>
-
+          {tooltipVisible && (
+            <div
+              className="tooltip"
+              style={{
+                position: 'absolute',
+                left: tooltipPosition.left,
+                top: tooltipPosition.top,
+                backgroundColor: 'white',
+                border: '1px solid black',
+                padding: '5px',
+                zIndex: 1000,
+              }}
+            >
+              {tooltipContent}
+            </div>
+          )}
+          <div style={{ backgroundColor: '#008CFF', color: 'white' }}>
+            {codeLog}
+          </div>
           {/* <div className='comments-container'>
             {comments.map((comment, index) => (
               <div key={index} className='comment' style={{ top: `${(comment.line - 1) * 30}px` }}>
@@ -587,9 +594,9 @@ function CodeEditor() {
           </div> */}
         </div>
         {popupVisible && (
-          <CommentPopup 
-            position={popupPosition} 
-            onClose={closePopup} 
+          <CommentPopup
+            position={popupPosition}
+            onClose={closePopup}
             onCommentSubmit={handleCommentSubmit}
             commentLine={currCommentLine}
           />
@@ -599,5 +606,4 @@ function CodeEditor() {
   );
 }
 
-
-export default CodeEditor
+export default CodeEditor;
