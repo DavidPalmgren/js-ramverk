@@ -142,6 +142,7 @@ function Document() {
   
         if (response.ok) {
           const result = await response.json();
+          console.log('user id', result.data.user.id)
           setUserId(result.data.user.id);
         }
       } catch (errorMsg) {
@@ -274,11 +275,8 @@ function Document() {
         };
 
         const spans = document.querySelectorAll('span.highlight');
-        console.log('Num of spans', spans);
 
         spans.forEach(span => {
-            console.log("span");
-            console.log(span);
 
             span.addEventListener('mouseover', () => {
                 const commentId = span.id;
@@ -373,6 +371,8 @@ function Document() {
         const errorText = await response.text();
         console.error(`Error: ${response.status} - ${errorText}`);
         return;
+      } else {
+        //console.log(response)
       }
     } catch (errorMsg) {
       console.error(errorMsg)
