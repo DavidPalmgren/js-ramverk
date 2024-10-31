@@ -16,6 +16,8 @@ function CodeEditor() {
   const editorRef = useRef(null);
   const [code, setCode] = useState('');
   const [codeLog, setCodeLog] = useState('Execute code to view');
+  const [isProgrammaticChange, setIsProgrammaticChange] = useState(false);
+  const [cursorPosition, setCursorPosition] = useState(null);
 
   const apiAddress = import.meta.env.VITE_API_ADDRESS;
   const wsApiAddress = import.meta.env.VITE_WS_API_ADDRESS;
@@ -33,20 +35,20 @@ function CodeEditor() {
   function setEditorContent(newContent: string) {
     if (editorRef.current) {
       const editor = editorRef.current;
-      console.log('pos= ?', editor.getPosition())
-      editor?.focus();
-      const cursorPosition = editor.getPosition()
-
-      //setCode(newContent);
-      //editor.getModel().setValue(newContent);
-
-      if (cursorPosition) {
-        editor.setPosition(cursorPosition);
-        console.log('pos2= ?', editor.getPosition())
-
-      }
+      const currentCursorPosition = editor.getPosition();
+      setCursorPosition(currentCursorPosition);
+      setCode(newContent);
     }
   }
+  
+  // fixed cursor position in monaco
+  useEffect(() => {
+    if (editorRef.current && cursorPosition) {
+      const editor = editorRef.current;
+      editor.setPosition(cursorPosition);
+      editor.revealLine(cursorPosition.lineNumber);
+    }
+  }, [code]);
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -245,11 +247,10 @@ function CodeEditor() {
   }
 
   const handleEditorChange = (value) => {
-    console.log('handleEditorChange');
-    console.log('handleEditorChange', typeof value);
     setCode(value);
     updateDocument(value, false);
   };
+
 
   return (
     <div className="document-container">
