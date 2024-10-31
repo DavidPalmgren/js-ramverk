@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Link } from 'react-router-dom';
 import App from './App.tsx';
 import Document from './routes/Document.tsx';
 import CreateAccount from './routes/CreateAccount.tsx';
@@ -11,17 +11,21 @@ import './index.css';
 
 import CodeEditor from './routes/CodeEditor.tsx';
 
-const NotFound = () => <div>404 this will load but nothing else</div>;
+import ProtectedRoute from './utils/routeGuard.tsx';
+
+const NotFound = () => <div><Link to="/login"></Link>404 this will load but nothing else</div>;
 const basename = "/~dapa22/editor/";
+
+
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <ProtectedRoute><App /></ProtectedRoute>,
   },
   {
     path: '/:id',
-    element: <Document />,
+    element: <ProtectedRoute><Document /></ProtectedRoute>,
   },
   {
     path: '/signup',
@@ -33,7 +37,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/documents',
-    element: <AllDocuments />,
+    element: <ProtectedRoute><AllDocuments /></ProtectedRoute>,
   },
 
   {
@@ -42,7 +46,7 @@ const router = createBrowserRouter([
   },
   {
     path: 'code/:id',
-    element: <CodeEditor />,
+    element: <ProtectedRoute><CodeEditor /></ProtectedRoute>,
   },
   {
     path: "*", // This will catch all other routes
