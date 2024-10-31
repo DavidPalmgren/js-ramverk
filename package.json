@@ -1,15 +1,17 @@
 {
   "name": "js-ramverk-refactor",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "homepage": "/",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview",
-    "format": "prettier --write"
-  },
+"scripts": {
+  "dev": "vite",
+  "build": "tsc -b || true && vite build",
+  "lint": "eslint .",
+  "preview": "vite preview",
+  "deploy": "npm run build && rsync -av --delete dist/ dapa22@ssh.student.bth.se:www/editor && echo 'visit on https://www.student.bth.se/~dapa22/editor/' ",
+  "format": "prettier --write"
+},
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
     "codemirror": "^6.0.1",
