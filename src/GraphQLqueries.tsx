@@ -53,6 +53,20 @@ export default {
           content
         }
       }`;
+  }, // just gonna use """""" it works
+  updateDocument2: (
+    document: string,
+    title: string,
+    content: string
+  ): string => {
+    // old one
+    return `mutation {
+      updateDocument(document: "${document}", title: """${title}""", content: "${content}") {
+        id
+        title
+        content
+      }
+    }`;
   },
   insertComment: (document: string, comment: string, line: string) => {
     return `mutation {

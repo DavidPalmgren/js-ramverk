@@ -68,6 +68,8 @@ function Document() {
   const [pendingCommentRange, setPendingCommentRange] = useState(null);
 
   const apiAddress = import.meta.env.VITE_API_ADDRESS;
+  const wsApiAddress = import.meta.env.VITE_WS_API_ADDRESS;
+
 
   let debounceTimeout;
 
@@ -126,36 +128,9 @@ function Document() {
   }, [apiAddress]);
 
   useEffect(() => {
-    const fetchUserId = async () => {
-      try {
-        const token = localStorage.getItem('Bearer');
-        const query = GraphQLqueries.getUser();
-        const response = await fetch(`${apiAddress}/query`, {
-          method: 'POST',
-          body: JSON.stringify({ query }),
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: token,
-          },
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          console.log('user id', result.data.user.id);
-          setUserId(result.data.user.id);
-        }
-      } catch (errorMsg) {
-        console.error(errorMsg);
-      }
-    };
-
-    fetchUserId();
-  }, [apiAddress]);
-
-  useEffect(() => {
     if (userId && id) {
       const client = createClient({
-        url: 'ws://localhost:1337/query',
+        url: `${wsApiAddress}`,
       });
 
       client.on('connected', () => {
