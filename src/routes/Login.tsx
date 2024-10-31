@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function Login() {
   const [email, setUsername] = useState('');
@@ -67,6 +67,7 @@ export default function Login() {
         </button>
 
         {error && <p className="error-message">{error}</p>}
+        <Link to="/signup">No account?</Link>
       </form>
     </div>
   );

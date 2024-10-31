@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function CreateAccount () {
   const [email, setUsername] = useState('');
@@ -56,10 +56,12 @@ export default function CreateAccount () {
             required
           />
         </div>
-        {error && <p className="error-message">{error}</p>}
         <button type="submit" className="button-blue2">
           Sign up
         </button>
+        {error && <p className="error-message">{error}</p>}
+        <Link to="/login">Have an account?</Link>
+
       </form>
     </div>
   );
